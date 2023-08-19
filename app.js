@@ -9,7 +9,7 @@ const app = express();
 
 
 // Configure server settings
-const port = 10000;
+const port = process.env.PORT ?? 10000;
 
 // TODO: SSL STUFF ADD LATER
 // const serverOptions = {
@@ -19,7 +19,8 @@ const port = 10000;
 serverOptions = {};
 
 // Add routes
-app.use("/", routes);
+app.use("/", routes.pageRoutes);
+app.use("/api", routes.apiRoutes);
 
 
 // Start server
