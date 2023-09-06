@@ -1,19 +1,21 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+serverUser = {
+    email: "mkline13@gmail.com",
+    passwordHash: bcrypt.hashSync("b0bb0", 10)
+};
 
-// Create JWTs
+// Create JWT
 // check that email and password belong to a registered user
 // Returns new token if email/password combo is valid. Otherwise returns null
 const generateTokenIfValidUser = async (email, password) => {
     // TODO: find user in database
-    serverUser = null;
+
     
     // TODO: check password and return null if user invalid
-    const passwordValid = await bcrypt.compare(password, serverUser.password)
-    passwordValid = false;
-    if (!passwordValid) {
+    const match = await bcrypt.compare(password, serverUser.passwordHash)
+    if (!match) {
         return null
     }
 
@@ -81,6 +83,7 @@ const validateTokenForPrivatePages = (req, res, next) => {
 // Does not reroute on auth failure
 const validateToken = (req, res, next) => {
     if (req.headers.authorization) {
+        console.log("HEADERS", req.headers);
         const token = req.headers["authorization"].split(" ")[1];
         if (token) {
             try {

@@ -1,15 +1,37 @@
 
 const http = require("http");
 const express = require("express");
+const sessions = require("express-session");
 const routes = require("./routes");
 
 
 // Create app object: manages URL routing
 const app = express();
 
-
 // Configure server settings
-const port = process.env.PORT ?? 10000;
+process.env.PORT = process.env.PORT ?? 10000;
+process.env.SESSION_SECRET = process.env.SESSION_SECRET ?? "none";
+
+if (process.env.SESSION_SECRET == "none") {
+    console.log("WARNING, SESSION_SECRET NOT SET!");
+}
+
+app.use(sessions({
+    secret: process.env.SESSION_SECRET,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24, // 24 hours
+        secure: false, // TODO: SET THIS TO TRUE AFTER ADDING SSL
+      },
+    resave: false,
+    saveUninitialized: true,
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+// Add routes
+app.use("/", routes);
+
 
 // TODO: SSL STUFF ADD LATER
 // const serverOptions = {
@@ -18,12 +40,7 @@ const port = process.env.PORT ?? 10000;
 // }
 serverOptions = {};
 
-// Add routes
-app.use("/", routes.pageRoutes);
-app.use("/api", routes.apiRoutes);
-
-
 // Start server
-const server = http.createServer(serverOptions, app).listen(port, () => {
-    console.log(`Listening on port ${port}...`)
+const server = http.createServer(serverOptions, app).listen(process.env.PORT, () => {
+    console.log(`Listening on port ${process.env.PORT}...`)
 });

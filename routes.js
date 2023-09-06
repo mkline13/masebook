@@ -1,26 +1,55 @@
 const express = require("express");
-const auth = require("./auth");
+const path = require('path');
 
+const routes = express.Router();
 
-const pageRoutes = express.Router();
-pageRoutes.use(express.json());
+function checkAuth(req, res, next) {
+    if (req.session.user) next();
+    else return res.redirect('/login');
+}
 
-pageRoutes.get("/", auth.validateTokenForPublicPages, (req, res) => {
-    if (res.locals.user) {
-        res.status(200).send("Logged in!  user: ", res.locals.user);
+routes.get("/", checkAuth, (req, res) => {
+    return res.sendFile(__dirname + '/pages/dashboard.html');
+});
+
+routes.get("/login", (req, res) => {
+    // redirect to home page if logged in
+    if (req.session.user) {
+        return res.redirect('/');
     }
-    else {
-        res.status(200).send("Not logged in.");
+
+    return res.sendFile(__dirname + '/pages/login.html');
+});
+
+routes.post("/api/login", (req, res) => {
+    if (req.body.email !== 'mkline13@gmail.com' || req.body.password !== 'b0bb0') {
+        return res.send('Invalid username or password');
     }
+
+    req.session.regenerate(function (err) {
+        if (err) next(err);
+
+        req.session.user = req.body.email;
+
+        req.session.save(function (err) {
+            if (err) return next(err);
+            return res.redirect('/');
+        });
+    });
+});
+
+routes.get("/api/logout", (req, res) => {
+    req.session.user = null;
+    
+    req.session.save(function (err) {
+        if (err) return next(err);
+
+        req.session.regenerate(function (err) {
+            if (err) next(err);
+            return res.redirect('/');
+        });
+    });
 });
 
 
-const apiRoutes = express.Router();
-apiRoutes.use(express.json());
-
-apiRoutes.get("/login", (req, res) => {
-    res.status(200).send("Logged in!");
-})
-
-
-module.exports = { pageRoutes, apiRoutes };
+module.exports = routes;
