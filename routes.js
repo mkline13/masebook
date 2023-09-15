@@ -4,58 +4,20 @@ const db = require('./db');
 
 const routes = express.Router();
 
+// MIDDLEWARE
 function checkAuth(req, res, next) {
+    // this function should work if express-session is working properly
     if (req.session.user) next();
     else res.redirect('/login');
 }
 
-routes.get("/", checkAuth, (req, res) => {
-    res.render('dashboard', { username: req.session.user });
-});
-
-routes.get("/login", (req, res) => {
-    // redirect to home page if logged in
-    if (req.session.user) {
-        return res.redirect('/');
-    }
-
-    res.render('login');
-});
-
+// PAGE ROUTES
+routes.get("/", checkAuth, require("./controller/dashboard_page_controller"));
+routes.get("/login", require("./controller/login_page_controller"));
 
 // API ROUTES
-routes.post("/api/login", (req, res) => {
-    // TODO: sanitize email
-    // TODO: sanitize password
-
-    if (req.body.email !== 'mkline13@gmail.com' || req.body.password !== 'b0bb0') {
-        return res.send('Invalid username or password');
-    }
-
-    req.session.regenerate(function (err) {
-        if (err) next(err);
-
-        req.session.user = req.body.email;
-
-        req.session.save(function (err) {
-            if (err) return next(err);
-            return res.redirect('/');
-        });
-    });
-});
-
-routes.get("/api/logout", (req, res) => {
-    req.session.user = null;
-    
-    req.session.save(function (err) {
-        if (err) return next(err);
-
-        req.session.regenerate(function (err) {
-            if (err) next(err);
-            return res.redirect('/');
-        });
-    });
-});
+routes.post("/api/login", require("./controller/api_login_controller"));
+routes.get("/api/logout", require("./controller/api_logout_controller"));
 
 
 module.exports = routes;

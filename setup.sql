@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS users CASCADE;
 DROP TYPE IF EXISTS account_status_t;
 
 CREATE TYPE account_status_t AS ENUM ('active', 'inactive');
+CREATE TYPE account_type_t AS ENUM ('user', 'admin');
 
 CREATE TABLE users (
     id              SERIAL              PRIMARY KEY,
@@ -15,16 +16,17 @@ CREATE TABLE users (
     display_name    VARCHAR(255)        DEFAULT '',
     real_name       VARCHAR(255)        NOT NULL,
     phone_no        VARCHAR(15)         NOT NULL,
-    account_status  account_status_t    NOT NULL DEFAULT 'active'
+    account_status  account_status_t    NOT NULL DEFAULT 'active',
+    account_type    account_type_t      NOT NULL DEFAULT 'user'
 );
 
 
 /* TEST DATA - move to separate file eventually */
-INSERT INTO users(email, real_name, phone_no) VALUES
-    ('mkline13@gmail.com', 'Mason Kline', '15417293753'),
-    ('mason@mason.mason', 'Mason Kline', '15417293753'),
-    ('basin@basin.com', 'Basin Kline', '15417293753'),
-    ('scooby@gmail.com', 'Scooby Dooby', '15417293753');
+INSERT INTO users(email, real_name, phone_no, account_type) VALUES
+    ('mkline13@gmail.com', 'Mason Kline', '15417293753', 'admin'),
+    ('mason@mason.mason', 'Mason Kline', '15417293753', 'user'),
+    ('basin@basin.com', 'Basin Kline', '15417293753', 'user'),
+    ('scooby@gmail.com', 'Scooby Dooby', '15417293753', 'user');
 
 SELECT * FROM users;
 
