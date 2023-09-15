@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS users CASCADE;
 
 /* ===== USERS TABLE ===== */
 DROP TYPE IF EXISTS account_status_t;
+DROP TYPE IF EXISTS account_type_t;
 
 CREATE TYPE account_status_t AS ENUM ('active', 'inactive');
 CREATE TYPE account_type_t AS ENUM ('user', 'admin');
@@ -33,6 +34,8 @@ SELECT * FROM users;
 
 
 /* ===== POKE TABLE ===== */
+DROP TYPE IF EXISTS poke_t;
+
 CREATE TYPE poke_t AS ENUM ('basic', 'soft', 'hard', 'sneaky', 'punch', 'slap', 'tickle');
 
 CREATE TABLE pokes (
