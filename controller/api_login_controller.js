@@ -1,10 +1,22 @@
+const db = require('../model/db');
 
 
-const login_controller = (req, res) => {
+const hash = (inp) => {
+    // TODO: properly hash passwords
+    return inp;
+}
+
+
+const login_controller = async (req, res) => {
     // TODO: sanitize email
     // TODO: sanitize password
 
-    if (req.body.email !== 'mkline13@gmail.com' || req.body.password !== 'b0bb0') {
+    const client_email = req.body.email;
+    const client_hashed_password = hash(req.body.password);
+
+    const server_result = (await db.query("SELECT email, hashed_password, account_status FROM users WHERE email = $1;", [client_email])).rows[0];
+
+    if (client_email !== server_result.email || client_hashed_password !== server_result.hashed_password || server_result.account_status != 'active') {
         return res.send('Invalid username or password');
     }
 

@@ -1,6 +1,5 @@
 const express = require("express");
 const path = require('path');
-const db = require('../model/db');
 
 const routes = express.Router();
 

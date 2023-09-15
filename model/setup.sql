@@ -13,6 +13,7 @@ CREATE TYPE account_type_t AS ENUM ('user', 'admin');
 CREATE TABLE users (
     id              SERIAL              PRIMARY KEY,
     email           VARCHAR(255)        UNIQUE NOT NULL,
+    hashed_password VARCHAR(255)        NOT NULL, /* TODO: check length of hashed passwords */
     display_name    VARCHAR(255)        DEFAULT '',
     real_name       VARCHAR(255)        NOT NULL,
     phone_no        VARCHAR(15)         NOT NULL,
@@ -22,11 +23,11 @@ CREATE TABLE users (
 
 
 /* TEST DATA - move to separate file eventually */
-INSERT INTO users(email, real_name, phone_no, account_type) VALUES
-    ('mkline13@gmail.com', 'Mason Kline', '15417293753', 'admin'),
-    ('mason@mason.mason', 'Mason Kline', '15417293753', 'user'),
-    ('basin@basin.com', 'Basin Kline', '15417293753', 'user'),
-    ('scooby@gmail.com', 'Scooby Dooby', '15417293753', 'user');
+INSERT INTO users(email, hashed_password, real_name, phone_no, account_type) VALUES
+    ('mkline13@gmail.com', 'b0bb0', 'Mason Kline', '15417293753', 'admin'),
+    ('mason@mason.mason', 'b0bb0', 'Mason Kline', '15417293753', 'user'),
+    ('basin@basin.com', 'b0bb0', 'Basin Kline', '15417293753', 'user'),
+    ('scooby@gmail.com', 'b0bb0', 'Scooby Dooby', '15417293753', 'user');
 
 SELECT * FROM users;
 
