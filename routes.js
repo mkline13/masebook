@@ -1,15 +1,16 @@
 const express = require("express");
 const path = require('path');
+const db = require('./db');
 
 const routes = express.Router();
 
 function checkAuth(req, res, next) {
     if (req.session.user) next();
-    else return res.redirect('/login');
+    else res.redirect('/login');
 }
 
 routes.get("/", checkAuth, (req, res) => {
-    return res.sendFile(__dirname + '/pages/dashboard.html');
+    res.render('dashboard', { username: req.session.user });
 });
 
 routes.get("/login", (req, res) => {
@@ -18,10 +19,15 @@ routes.get("/login", (req, res) => {
         return res.redirect('/');
     }
 
-    return res.sendFile(__dirname + '/pages/login.html');
+    res.render('login');
 });
 
+
+// API ROUTES
 routes.post("/api/login", (req, res) => {
+    // TODO: sanitize email
+    // TODO: sanitize password
+
     if (req.body.email !== 'mkline13@gmail.com' || req.body.password !== 'b0bb0') {
         return res.send('Invalid username or password');
     }

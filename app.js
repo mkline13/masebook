@@ -7,6 +7,7 @@ const routes = require("./routes");
 
 // Create app object: manages URL routing
 const app = express();
+app.set('view engine', 'pug');
 
 // Configure server settings
 process.env.PORT = process.env.PORT ?? 10000;
