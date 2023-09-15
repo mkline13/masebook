@@ -2,7 +2,7 @@
 const http = require("http");
 const express = require("express");
 const sessions = require("express-session");
-const routes = require("./routes");
+const routes = require("./controller/routes");
 
 
 // Create app object: manages URL routing
