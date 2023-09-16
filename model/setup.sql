@@ -25,10 +25,10 @@ CREATE TABLE users (
 
 /* TEST DATA - move to separate file eventually */
 INSERT INTO users(email, hashed_password, real_name, phone_no, account_type) VALUES
-    ('mkline13@gmail.com', 'b0bb0', 'Mason Kline', '15417293753', 'admin'),
-    ('mason@mason.mason', 'b0bb0', 'Mason Kline', '15417293753', 'user'),
-    ('basin@basin.com', 'b0bb0', 'Basin Kline', '15417293753', 'user'),
-    ('scooby@gmail.com', 'b0bb0', 'Scooby Dooby', '15417293753', 'user');
+    ('mkline13@gmail.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Mason Kline', '15417293753', 'admin'),
+    ('mason@mason.mason', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Mason Kline', '15417293753', 'user'),
+    ('basin@basin.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Basin Kline', '15417293753', 'user'),
+    ('scooby@gmail.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Scooby Dooby', '15417293753', 'user');
 
 SELECT * FROM users;
 
