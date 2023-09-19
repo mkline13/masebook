@@ -1,0 +1,124 @@
+:root {
+    --poke-color: yellow;
+    --slap-color: red;
+    --tickle-color: magenta;
+    --background-color: lightgray;
+}
+
+body {
+    background-color: var(--background-color);
+}
+
+header {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+main {
+    padding-left: 1em;
+    padding-right: 1em;
+    overflow: scroll;
+}
+
+.grid-container {
+    display: grid;
+    height: 100vh;
+    grid-template-columns: 0.2fr 1fr;
+    grid-template-rows: 0.1fr 1fr;
+    grid-template-areas:
+        "header main"
+        "sidebar main";
+    grid-gap: 1em;
+}
+
+.grid-item {
+    background-color: rgb(237, 237, 237);
+}
+
+.grid-container > #header {
+    grid-area: header;
+}
+
+.grid-container > #sidebar {
+    grid-area: sidebar;
+}
+
+.grid-container > #feed {
+    grid-area: main;
+}
+
+
+article.post {
+    border-left-style: solid;
+    border-left-color: #539eff;
+    border-left-width: 4px;
+    background-color: #f3f8ff;
+    margin: 0.5em;
+    margin-bottom: 0.5em;
+    border-radius: 0.2em;
+    padding: 0.5em;
+    box-sizing: border-box;
+}
+
+article.post.pinned {
+    border-left-color: gray;
+    background-color: rgb(239, 239, 239);
+    margin-bottom: 0;
+    margin-top: 0;
+    border-bottom: solid lightgray 1px;
+}
+
+.pinned > article {
+    margin-bottom: 0;
+    margin-top: 0;
+    border-bottom: solid gray 0.5px;
+}
+
+article > p {
+    margin: 0.5em;
+}
+
+button.poke {
+    color: var(--poke-color);
+    border-radius: 0.5em;
+    background-color: rgb(180, 180, 180);
+    border-style: none;
+    padding: 0.1em;
+    margin: 0.1em;
+    min-width: 1.1em;
+}
+
+button.poke:hover {
+    background-color: lightgray;
+}
+
+button.poke.slap {
+    color: var(--slap-color);
+}
+
+button.poke.tickle {
+    color: var(--tickle-color);
+}
+
+button.poke.hide {
+    color: white;
+}
+
+@media only screen and (max-width: 768px) {
+    body {
+        overflow: scroll;
+    }
+    .grid-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 0.1fr 0.1fr 1fr;
+        grid-template-areas:
+            "header"
+            "sidebar"
+            "main";
+        grid-gap: 1em;
+    }
+
+    main {
+        overflow: visible;
+    }
+}

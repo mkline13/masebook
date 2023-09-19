@@ -8,12 +8,21 @@ const dummy_dashboard_data = {
         new_messages: 22,
     },
     pinned: [
-        {content: "Pinned Hello world!", reactions: false, discussion: false}
+        {content: "Pinned Hello world!", reactions: false, discussion: false},
+        {content: "Pinned Hi Guys!", reactions: false, discussion: false},
+        {content: "Pinned Sup dood!", reactions: false, discussion: false},
+        {content: "Pinned AHAHA!", reactions: false, discussion: false},
     ],
     feed: [
         {content: "Hello world!", reactions: false, discussion: false},
         {content: "Hello world with reactions!", reactions: true, discussion: false},
-        {content: "Hello world! with discussion only", reactions: false, discussion: true}
+        {content: "Hello world! with discussion only", reactions: false, discussion: true},
+        {content: "Hello world!", reactions: false, discussion: false},
+        {content: "Hello world with reactions!", reactions: true, discussion: false},
+        {content: "Hello world! with discussion only", reactions: false, discussion: true},
+        {content: "Hello world!", reactions: false, discussion: false},
+        {content: "Hello world with reactions!", reactions: true, discussion: false},
+        {content: "Hello world! with discussion only", reactions: false, discussion: true},
     ],
     pokes: [
         { id: 1, poker: 'Joe', poker_id: 22 },

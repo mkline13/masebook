@@ -5,6 +5,7 @@ html
         meta(name='viewport' content='width=device-width, initial-scale=1')
         title Masebook | Dashboard
         link(rel='stylesheet', href='/public/css/normalize.css')
+        link(rel='stylesheet', href='/public/css/masebook.css')
         script.
             function pokeBack() {
                 const button = event.target
@@ -17,23 +18,40 @@ html
                 console.log("Hiding poke", poke_id)
             }
     body
-        h1 Masebook 
-        h2 Dashboard
-        p Greetings #{user.name}
-        div
-            h3 Pokes
-            ul
-                each poke in pokes 
-                    li #{poke.poker} poked you! 
-                        button(onclick="pokeBack()" data-pokee=poke.poker_id) poke em back
-                        button(onclick="hidePoke()" data-poke-id=poke.id) hide
-        div
-            h3 Feed
-            div
-                each post in feed
-                    div.post
-                        p= post.content
-                        if post.reactions
-                            p REACTIONS
-                        if post.discussion
-                            p DISCUSSION
+        div.grid-container
+            header.grid-item#header
+                h1 Masebook 
+                p Greetings #{user.name}
+            aside.grid-item#sidebar
+                ul
+                    li Messages [#{user.new_messages}]
+                    li Your spaces
+                        ul
+                            each space in user.spaces
+                                li= space
+                    li Memberships
+                        ul
+                            each space in user.member_of
+                                li= space
+            main.grid-item#feed
+                if pokes
+                    section
+                        h3 Pokes
+                        ul
+                            each poke in pokes 
+                                li #{poke.poker} poked you! 
+                                    button.poke(onclick="pokeBack()" data-pokee=poke.poker_id) poke
+                                    button.poke.slap(onclick="pokeBack()" data-pokee=poke.poker_id) slap
+                                    button.poke.tickle(onclick="pokeBack()" data-pokee=poke.poker_id) tickle
+                                    button.poke.hide(onclick="hidePoke()" data-poke-id=poke.id) ╳
+                if feed
+                    section
+                        h3 Feed
+                        div
+                            each post in feed
+                                article.post
+                                    p= post.content
+                                    if post.reactions
+                                        p REACTIONS
+                                    if post.discussion
+                                        p DISCUSSION
