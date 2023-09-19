@@ -2,22 +2,29 @@
     --poke-color: yellow;
     --slap-color: red;
     --tickle-color: magenta;
-    --background-color: lightgray;
+    --corner-rounding: 0.2em;
 }
 
 body {
-    background-color: var(--background-color);
+    background-color: white;
 }
 
 header {
     padding-left: 1em;
     padding-right: 1em;
+    background-color: #f3f8ff;
+    border-radius: var(--corner-rounding);
 }
 
 main {
     padding-left: 1em;
     padding-right: 1em;
     overflow: scroll;
+}
+
+#sidebar {
+    background-color: #f3f8ff;
+    border-radius: var(--corner-rounding);
 }
 
 .grid-container {
@@ -28,12 +35,12 @@ main {
     grid-template-areas:
         "header main"
         "sidebar main";
-    grid-gap: 1em;
+    grid-gap: 0.2em;
 }
 
-.grid-item {
+/* .grid-item {
     background-color: rgb(237, 237, 237);
-}
+} */
 
 .grid-container > #header {
     grid-area: header;
@@ -115,7 +122,6 @@ button.poke.hide {
             "header"
             "sidebar"
             "main";
-        grid-gap: 1em;
     }
 
     main {
