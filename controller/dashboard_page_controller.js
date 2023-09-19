@@ -1,7 +1,9 @@
+const retrieveDashboardData = require('../model/retrieve_dashboard_data');
 
 
 const dashboard_controller = (req, res) => {
-    res.render('dashboard', { username: req.session.user });
+    dashboardData = retrieveDashboardData(123);
+    res.render('dashboard', dashboardData);
 }
 
 

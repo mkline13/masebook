@@ -36,13 +36,13 @@ SELECT * FROM users;
 /* ===== POKE TABLE ===== */
 DROP TYPE IF EXISTS poke_t;
 
-CREATE TYPE poke_t AS ENUM ('basic', 'soft', 'hard', 'sneaky', 'punch', 'slap', 'tickle');
+CREATE TYPE poke_t AS ENUM ('poke', 'slap', 'tickle');
 
 CREATE TABLE pokes (
     id          SERIAL          PRIMARY KEY,
     poker       INT             NOT NULL,
     pokee       INT             NOT NULL,
-    poke_type   poke_t          NOT NULL DEFAULT 'basic',
+    poke_type   poke_t          NOT NULL DEFAULT 'poke',
     CONSTRAINT fk_to
         FOREIGN KEY(poker)
         REFERENCES users(id)

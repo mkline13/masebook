@@ -3,8 +3,7 @@ const bcrypt = require('bcryptjs');
 
 
 const login_controller = async (req, res) => {
-    // TODO: sanitize email
-    // TODO: sanitize password
+    // TODO: is this secure?
 
     const client_email = req.body.email;
     const client_password = req.body.password;

@@ -1,9 +1,39 @@
+doctype html
 html
     head
         meta(charset='utf-8')
         meta(name='viewport' content='width=device-width, initial-scale=1')
         title Masebook | Dashboard
+        link(rel='stylesheet', href='/public/css/normalize.css')
+        script.
+            function pokeBack() {
+                const button = event.target
+                const pokee_id = button.dataset.pokee
+                console.log("Poking back", pokee_id)
+            }
+            function hidePoke() {
+                const button = event.target
+                const poke_id = button.dataset.pokeId
+                console.log("Hiding poke", poke_id)
+            }
     body
         h1 Masebook 
         h2 Dashboard
-        p Greetings #{username}
+        p Greetings #{user.name}
+        div
+            h3 Pokes
+            ul
+                each poke in pokes 
+                    li #{poke.poker} poked you! 
+                        button(onclick="pokeBack()" data-pokee=poke.poker_id) poke em back
+                        button(onclick="hidePoke()" data-poke-id=poke.id) hide
+        div
+            h3 Feed
+            div
+                each post in feed
+                    div.post
+                        p= post.content
+                        if post.reactions
+                            p REACTIONS
+                        if post.discussion
+                            p DISCUSSION

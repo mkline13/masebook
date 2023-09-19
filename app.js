@@ -2,6 +2,7 @@
 const http = require("http");
 const express = require("express");
 const sessions = require("express-session");
+const path = require('path');
 const routes = require("./controller/routes");
 
 
@@ -29,6 +30,7 @@ app.use(sessions({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use("/public", express.static(path.join(__dirname, 'public')));
 
 // Add routes
 app.use("/", routes);
