@@ -1,4 +1,4 @@
-const pg = require('pg');
+import pg from 'pg';
 
 const pool = new pg.Pool({
     host: 'localhost',
@@ -24,4 +24,4 @@ const execute = async (func) => {
     return res;
 }
 
-module.exports = { query, execute, close };
+export { query, execute, close };

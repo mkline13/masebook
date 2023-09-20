@@ -1,14 +1,14 @@
-const db = require('../model/db');
-const bcrypt = require('bcryptjs');
+import { query } from '../model/db.js';
+import bcrypt from 'bcryptjs';
 
 
-const login_controller = async (req, res) => {
+const api_login_controller = async (req, res) => {
     // TODO: is this secure?
 
     const client_email = req.body.email;
     const client_password = req.body.password;
 
-    const query_result = await db.query("SELECT email, hashed_password, account_status FROM users WHERE email = $1;", [client_email]);
+    const query_result = await query("SELECT email, hashed_password, account_status FROM users WHERE email = $1;", [client_email]);
     const server_result = query_result.rows?.[0];
 
     if (server_result === undefined || server_result.account_status != 'active') {
@@ -35,4 +35,4 @@ const login_controller = async (req, res) => {
 }
 
 
-module.exports = login_controller;
+export default api_login_controller;

@@ -1,6 +1,6 @@
 
 
-const login_controller = (req, res) => {
+const login_page_controller = (req, res) => {
     // redirect to home page if logged in
     if (req.session.user) {
         return res.redirect('/');
@@ -9,4 +9,4 @@ const login_controller = (req, res) => {
     res.render('login');
 }
 
-module.exports = login_controller;
+export default login_page_controller;

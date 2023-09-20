@@ -19,7 +19,7 @@ html
             }
     body
         div.grid-container
-            header.grid-item#header
+            header.grid-item#main-header
                 h1 Masebook 
                 p Greetings #{user.name}
             aside.grid-item#sidebar
@@ -44,14 +44,16 @@ html
                                     button.poke.slap(onclick="pokeBack()" data-pokee=poke.poker_id) slap
                                     button.poke.tickle(onclick="pokeBack()" data-pokee=poke.poker_id) tickle
                                     button.poke.hide(onclick="hidePoke()" data-poke-id=poke.id) ╳
-                if feed
-                    section
-                        h3 Feed
+                section
+                    h3 Feed
+                    if feed
                         div
                             each post in feed
                                 article.post
+                                    img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="32" height="32")
+                                    h4= post.author
+                                        span.post-date  • #{post.date}
                                     p= post.content
-                                    if post.reactions
-                                        p REACTIONS
-                                    if post.discussion
-                                        p DISCUSSION
+                    else
+                        p Nothing here...
+

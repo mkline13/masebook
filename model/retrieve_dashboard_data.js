@@ -1,4 +1,3 @@
-const db = require("./db")
 
 const dummy_dashboard_data = {
     user: {
@@ -7,22 +6,16 @@ const dummy_dashboard_data = {
         member_of: ["X", "Y", "Z"],
         new_messages: 22,
     },
-    pinned: [
-        {content: "Pinned Hello world!", reactions: false, discussion: false},
-        {content: "Pinned Hi Guys!", reactions: false, discussion: false},
-        {content: "Pinned Sup dood!", reactions: false, discussion: false},
-        {content: "Pinned AHAHA!", reactions: false, discussion: false},
-    ],
     feed: [
-        {content: "Hello world!", reactions: false, discussion: false},
-        {content: "Hello world with reactions!", reactions: true, discussion: false},
-        {content: "Hello world! with discussion only", reactions: false, discussion: true},
-        {content: "Hello world!", reactions: false, discussion: false},
-        {content: "Hello world with reactions!", reactions: true, discussion: false},
-        {content: "Hello world! with discussion only", reactions: false, discussion: true},
-        {content: "Hello world!", reactions: false, discussion: false},
-        {content: "Hello world with reactions!", reactions: true, discussion: false},
-        {content: "Hello world! with discussion only", reactions: false, discussion: true},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world!"},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world with reactions!", reactions: true},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world! with discussion only", discussion: true},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world!"},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world with reactions!", reactions: true},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world! with discussion only", discussion: true},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world!"},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world with reactions!", reactions: true},
+        {author: "Jeb Beb", date: "7-30-2023", content: "Hello world! with discussion only", discussion: true},
     ],
     pokes: [
         { id: 1, poker: 'Joe', poker_id: 22 },
@@ -37,4 +30,4 @@ const retrieveDashboardData = (user_id) => {
     return dummy_dashboard_data;
 }
 
-module.exports = retrieveDashboardData;
+export default retrieveDashboardData;

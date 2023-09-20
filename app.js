@@ -1,9 +1,14 @@
 
-const http = require("http");
-const express = require("express");
-const sessions = require("express-session");
-const path = require('path');
-const routes = require("./controller/routes");
+import { createServer } from 'http';
+import express from 'express';
+import sessions from 'express-session';
+import path from 'path';
+import routes from './controller/routes.js';
+
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 
 // Create app object: manages URL routing
@@ -41,9 +46,11 @@ app.use("/", routes);
 //     key: fs.readFileSync(path.join(__dirname, '../ssl/server.key')),
 //     cert: fs.readFileSync(path.join(__dirname, '../ssl/server.cert')),
 // }
-serverOptions = {};
+const serverOptions = {};
 
 // Start server
-const server = http.createServer(serverOptions, app).listen(process.env.PORT, () => {
+const server = createServer(serverOptions, app).listen(process.env.PORT, () => {
     console.log(`Listening on port ${process.env.PORT}...`)
 });
+
+export default app;
