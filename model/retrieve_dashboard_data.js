@@ -26,7 +26,7 @@ const dummy_dashboard_data = {
 }
 
 
-const retrieveDashboardData = (user_id) => {
+const retrieveDashboardData = (db, user_id) => {
     return dummy_dashboard_data;
 }
 

@@ -1,27 +1,26 @@
 import pg from 'pg';
 
-const pool = new pg.Pool({
-    host: 'localhost',
-    port: 5432,
-    database: 'masebook',
-    user: 'work',
-    password: 'password',
-});
+export default class Database {
+    constructor(dbParams) {
+        this.pool = new pg.Pool(dbParams)
+    }
 
-// call this to gracefully close the db when the program quits
-const close = () => pool.end();
+    // call this to gracefully close the db when the program quits
+    close() {
+        this.pool.end()
+    }
 
-const query = async (text, params) => {
-    // logging code can be added here
-    return await pool.query(text, params);
+    // call this to execute a SINGLE query
+    async query(text, params) {
+        // logging code can be added here
+        return await this.pool.query(text, params);
+    }
+
+    // call this to execute a series of queries with the same client from the pool
+    async execute (func) {
+        const client = await this.pool.connect();
+        const res = await func(client);
+        client.release();
+        return res;
+    }
 }
-
-// ensures that all code in the callback function is executed with the same client from the pool
-const execute = async (func) => {
-    const client = await pool.connect();
-    const res = await func(client);
-    client.release();
-    return res;
-}
-
-export { query, execute, close };
