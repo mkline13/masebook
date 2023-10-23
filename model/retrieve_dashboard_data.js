@@ -1,11 +1,5 @@
 
 const dummy_dashboard_data = {
-    user: {
-        name: "Bob",
-        spaces: ["A", "B", "C"],
-        member_of: ["X", "Y", "Z"],
-        new_messages: 22,
-    },
     feed: [
         {author: "Jeb Beb", date: "7-30-2023", content: "Hello world!"},
         {author: "Jeb Beb", date: "7-30-2023", content: "Hello world with reactions!", reactions: true},

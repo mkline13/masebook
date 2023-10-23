@@ -1,0 +1,7 @@
+
+
+DBNAME='masebook'
+dropdb -f $DBNAME
+createdb $DBNAME
+psql -d $DBNAME -f 'model/setup.sql'
+psql -d $DBNAME -f 'model/test_users.sql'

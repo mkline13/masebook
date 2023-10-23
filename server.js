@@ -12,7 +12,7 @@ process.env.PORT = process.env.PORT ?? 10000;
 const serverOptions = {};
 
 // Start server
-const dbParams= {
+const dbParams = {
     host: 'localhost',
     port: 5432,
     database: 'masebook',

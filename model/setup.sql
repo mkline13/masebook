@@ -1,82 +1,63 @@
 
-/* CLEAN UP */
-DROP TABLE IF EXISTS pokes CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-
-
-/* ===== USERS TABLE ===== */
-DROP TYPE IF EXISTS account_status_t;
-DROP TYPE IF EXISTS account_type_t;
-
+/* ===== USERS ===== */
 CREATE TYPE account_status_t AS ENUM ('active', 'inactive');
 CREATE TYPE account_type_t AS ENUM ('user', 'admin');
-
 CREATE TABLE users (
     id              SERIAL              PRIMARY KEY,
     email           VARCHAR(255)        UNIQUE NOT NULL,
     hashed_password VARCHAR(255)        NOT NULL, /* TODO: check length of hashed passwords */
     display_name    VARCHAR(255)        DEFAULT '',
-    real_name       VARCHAR(255)        NOT NULL,
-    phone_no        VARCHAR(15)         NOT NULL,
     account_status  account_status_t    NOT NULL DEFAULT 'active',
-    account_type    account_type_t      NOT NULL DEFAULT 'user'
+    account_type    account_type_t      NOT NULL DEFAULT 'user',
+    show_in_dir     BOOLEAN             NOT NULL DEFAULT TRUE
 );
 
+/*
+    SPACES:
+        Spaces are where users can pass back and forth messages to each other. They can either be used for direct messages, group pages, or even user walls.
 
-/* TEST DATA - move to separate file eventually */
-INSERT INTO users(email, hashed_password, real_name, phone_no, account_type) VALUES
-    ('mkline13@gmail.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Mason Kline', '15417293753', 'admin'),
-    ('mason@mason.mason', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Mason Kline', '15417293753', 'user'),
-    ('basin@basin.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Basin Kline', '15417293753', 'user'),
-    ('scooby@gmail.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Scooby Dooby', '15417293753', 'user');
+    space types:
+        dm - direct messages
+        page - users' personal pages, public pages, or group pages
+*/
+CREATE TYPE space_t AS ENUM ('dm', 'page');
+CREATE TABLE spaces (
+    id              SERIAL              PRIMARY KEY,
+    owner           INT                 NOT NULL REFERENCES users,
+    space_type      space_t             NOT NULL,
+    title           VARCHAR(255)        NOT NULL,
+    description     VARCHAR             DEFAULT ''
+);
 
-SELECT * FROM users;
+/*
+    PARTICIPANTS:
+        A table that shows which users have participated in a space.
+*/
+CREATE TYPE participant_t AS ENUM ('follower', 'owner', 'member');
+CREATE TABLE participants (
+    id              SERIAL              PRIMARY KEY,
+    space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
+    user_id         INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
+    part_type       participant_t       NOT NULL
+);
 
+/*
+    MESSAGES:
+        Messages can be posted to spaces by users.
+*/
+CREATE TABLE messages (
+    id              SERIAL              PRIMARY KEY,
+    space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
+    sender_id       INT                 NOT NULL REFERENCES users,
+    parent_id       INT                 REFERENCES messages ON DELETE CASCADE,
+    contents        VARCHAR             NOT NULL
+);
 
 /* ===== POKE TABLE ===== */
-DROP TYPE IF EXISTS poke_t;
-
 CREATE TYPE poke_t AS ENUM ('poke', 'slap', 'tickle');
-
 CREATE TABLE pokes (
-    id          SERIAL          PRIMARY KEY,
-    poker       INT             NOT NULL,
-    pokee       INT             NOT NULL,
-    poke_type   poke_t          NOT NULL DEFAULT 'poke',
-    CONSTRAINT fk_to
-        FOREIGN KEY(poker)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-    CONSTRAINT fk_from
-        FOREIGN KEY(pokee)
-        REFERENCES users(id)
-        ON DELETE CASCADE
+    id              SERIAL              PRIMARY KEY,
+    sender          INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
+    recipient       INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
+    poke_type       poke_t              NOT NULL
 );
-
-/* this view gives poker and pokee emails for each poke as well as poke_type */
-CREATE VIEW poke_info AS
-    SELECT
-        p.id AS poke_id,
-        poker_user.email AS poker,
-        pokee_user.email AS pokee,
-        p.poke_type AS poke_type
-    FROM
-        pokes p
-    INNER JOIN
-        users poker_user
-    ON
-        p.poker = poker_user.id
-    INNER JOIN
-        users pokee_user
-    ON
-        p.pokee = pokee_user.id;
-
-
-/* TEST DATA - move to separate file eventually */
-INSERT INTO pokes(poker, pokee) VALUES
-    (1, 2),
-    (2, 1),
-    (3, 1),
-    (4, 1);
-
-SELECT * FROM poke_info WHERE pokee = 'mkline13@gmail.com';

@@ -50,7 +50,7 @@ main {
     grid-area: sidebar;
 }
 
-.grid-container > #feed {
+.grid-container > #content {
     grid-area: main;
 }
 
