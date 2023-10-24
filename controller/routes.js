@@ -6,7 +6,6 @@ import api_logout_controller from '../controller/api_logout_controller.js';
 import api_dashboard_controller from '../controller/api_dashboard_controller.js';
 import api_users_controller from '../controller/api_users_controller.js';
 
-import dummy_page_controller from './dummy_page_controller.js';
 
 // MIDDLEWARE
 function checkAuth(req, res, next) {
@@ -17,6 +16,15 @@ function checkAuth(req, res, next) {
 function checkAuthAPI(req, res, next) {
     if (req.session.user) next();
     else res.status(401).send("not authenticated");
+}
+
+function create_dummy_page_controller (msg) {
+    // creates a dummy page controller as a placeholder. Displays the message provided in the parameters.
+    const page_controller = (req, res) => {
+        res.status(200).send("DUMMY PAGE: " + msg);
+    }
+
+    return page_controller;
 }
 
 // Adds routes to the provided app using the provided database
@@ -42,7 +50,7 @@ export default function routes(app, db) {
     app.get("/", checkAuth, getSidebarData, dashboard_page_controller(db));
     app.get("/login", login_page_controller()); // TODO: make login redirect to correct page after successful auth (say user initially tries to go to directory but is redirected to login)
     app.get("/directory", checkAuth, getSidebarData, (req, res) => { res.render('directory'); });
-    app.get("/settings", checkAuth, dummy_page_controller("settings page"));
+    app.get("/settings", checkAuth, create_dummy_page_controller("settings page"));
 
     // API ROUTES
     app.post("/api/login", api_login_controller(db));
