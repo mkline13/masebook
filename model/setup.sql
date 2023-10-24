@@ -1,5 +1,7 @@
 
-/* ===== USERS ===== */
+/*
+ * USERS
+ */
 CREATE TYPE account_status_t AS ENUM ('active', 'inactive');
 CREATE TYPE account_type_t AS ENUM ('user', 'admin');
 CREATE TABLE users (
@@ -13,13 +15,12 @@ CREATE TABLE users (
 );
 
 /*
-    SPACES:
-        Spaces are where users can pass back and forth messages to each other. They can either be used for direct messages, group pages, or even user walls.
-
-    space types:
-        dm - direct messages
-        page - users' personal pages, public pages, or group pages
-*/
+ *  SPACES:
+ *      Spaces are where users can pass back and forth messages to each other. They can either be used for direct messages, group pages, or even user walls.
+ *  space types:
+ *      dm - direct messages
+ *      page - users' personal pages, public pages, or group pages
+ */
 CREATE TYPE space_t AS ENUM ('dm', 'page');
 CREATE TABLE spaces (
     id              SERIAL              PRIMARY KEY,
@@ -30,9 +31,9 @@ CREATE TABLE spaces (
 );
 
 /*
-    PARTICIPANTS:
-        A table that shows which users have participated in a space.
-*/
+ *  PARTICIPANTS:
+ *      A table that shows which users have participated in a space.
+ */
 CREATE TYPE participant_t AS ENUM ('follower', 'owner', 'member');
 CREATE TABLE participants (
     id              SERIAL              PRIMARY KEY,
@@ -42,9 +43,9 @@ CREATE TABLE participants (
 );
 
 /*
-    MESSAGES:
-        Messages can be posted to spaces by users.
-*/
+ *  MESSAGES:
+ *      Messages can be posted to spaces by users.
+ */
 CREATE TABLE messages (
     id              SERIAL              PRIMARY KEY,
     space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
@@ -53,7 +54,9 @@ CREATE TABLE messages (
     contents        VARCHAR             NOT NULL
 );
 
-/* ===== POKE TABLE ===== */
+/*
+ *  POKES
+ */
 CREATE TYPE poke_t AS ENUM ('poke', 'slap', 'tickle');
 CREATE TABLE pokes (
     id              SERIAL              PRIMARY KEY,
@@ -61,3 +64,10 @@ CREATE TABLE pokes (
     recipient       INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
     poke_type       poke_t              NOT NULL
 );
+
+
+/*
+ *  FUNCTIONS
+ */
+
+/* */

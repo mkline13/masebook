@@ -13,7 +13,6 @@ html
             header.grid-item#page-header
                 h1
                     a(href="/") Masebook 
-                p Greetings #{user.name}
             aside.grid-item#sidebar
                 ul
                     li Messages [#{user.new_messages}]
@@ -26,6 +25,10 @@ html
                             each space in user.member_of
                                 li= space
                     li
-                        a(href="/directory") Server Directory
+                        a(href="/directory") User Directory
+                    li
+                        a(href="/settings") Settings
+                    li
+                        a(href="/api/logout") Log Out
             main.grid-item#content
                 block content
