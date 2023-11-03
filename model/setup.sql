@@ -8,51 +8,78 @@ CREATE TABLE users (
     id              SERIAL              PRIMARY KEY,
     email           VARCHAR(255)        UNIQUE NOT NULL,
     hashed_password VARCHAR(255)        NOT NULL, /* TODO: check length of hashed passwords */
-    display_name    VARCHAR(255)        DEFAULT '',
     account_status  account_status_t    NOT NULL DEFAULT 'active',
     account_type    account_type_t      NOT NULL DEFAULT 'user',
-    show_in_dir     BOOLEAN             NOT NULL DEFAULT TRUE
+    display_name    VARCHAR(255)        DEFAULT '',
+    show_in_dir     BOOLEAN             NOT NULL DEFAULT TRUE  /* whether or not the user will be shown in the server directory */
 );
 
 /*
  *  SPACES:
  *      Spaces are where users can pass back and forth messages to each other. They can either be used for direct messages, group pages, or even user walls.
- *  space types:
- *      dm - direct messages
- *      page - users' personal pages, public pages, or group pages
+ *  credential levels:
+ *      - 0-63      server admins
+ *      - 64-127    space admins
+ *      - 128-191   space mods
+ *      - 192-254   space members
+ *      - 224-254   server users
+ *      - 255       web users
  */
-CREATE TYPE space_t AS ENUM ('dm', 'page');
 CREATE TABLE spaces (
-    id              SERIAL              PRIMARY KEY,
-    owner           INT                 NOT NULL REFERENCES users,
-    space_type      space_t             NOT NULL,
-    title           VARCHAR(255)        NOT NULL,
-    description     VARCHAR             DEFAULT ''
+    id                  SERIAL              PRIMARY KEY,
+    owner_id            INT                 NOT NULL REFERENCES users ON DELETE CASCADE, /* user id of the owner of the space */
+    name                VARCHAR(255)        NOT NULL,
+    description         VARCHAR             DEFAULT '',
+    creation_date       TIMESTAMP           NOT NULL DEFAULT now(),
+    visibility_lvl      INT                 NOT NULL DEFAULT 192,  /* minimum credential level required to see content (posts + comments) in space */
+    authorship_lvl      INT                 NOT NULL DEFAULT 192,  /* minimum credential level required to author posts in space */
+    show_in_dir         BOOLEAN             NOT NULL DEFAULT false   /* whether or not the space will be shown in the server directory */
 );
 
 /*
- *  PARTICIPANTS:
- *      A table that shows which users have participated in a space.
+ *  SPACE_PERMISSIONS:
+ *      Defines a user's credential level within a particular space.
  */
-CREATE TYPE participant_t AS ENUM ('follower', 'owner', 'member');
-CREATE TABLE participants (
+CREATE TABLE space_permissions (
     id              SERIAL              PRIMARY KEY,
     space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
     user_id         INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
-    part_type       participant_t       NOT NULL
+    user_lvl        INT                 NOT NULL  /* the credential level of this participant in the space */
 );
 
 /*
- *  MESSAGES:
- *      Messages can be posted to spaces by users.
+ *  POSTS:
+ *      Posts can be posted to spaces by users.
  */
-CREATE TABLE messages (
+CREATE TABLE posts (
     id              SERIAL              PRIMARY KEY,
     space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
-    sender_id       INT                 NOT NULL REFERENCES users,
-    parent_id       INT                 REFERENCES messages ON DELETE CASCADE,
+    author_id       INT                 NOT NULL REFERENCES users,
+    allow_comments  BOOLEAN             NOT NULL,
+    allow_reactions BOOLEAN             NOT NULL,
+    creation_date   TIMESTAMP           NOT NULL,
     contents        VARCHAR             NOT NULL
 );
+
+/*
+ *  COMMENTS:
+ *      Comments are attached to posts
+ */
+
+ CREATE TABLE comments (
+    id              SERIAL              PRIMARY KEY,
+    post_id         INT                 NOT NULL REFERENCES posts ON DELETE CASCADE,
+    response_to_id  INT                 REFERENCES posts ON DELETE CASCADE,
+    author_id       INT                 NOT NULL REFERENCES users,
+    creation_date   TIMESTAMP           NOT NULL,
+    contents        VARCHAR             NOT NULL
+ );
+
+/*
+ *  DM_THREADS
+ */
+
+/* TODO */
 
 /*
  *  POKES
@@ -70,4 +97,13 @@ CREATE TABLE pokes (
  *  FUNCTIONS
  */
 
-/* */
+/* convert email address to user id */
+CREATE OR REPLACE FUNCTION email_to_user(email_address text)
+    RETURNS integer AS $$
+        DECLARE
+            user_id integer;
+        BEGIN
+            SELECT id INTO user_id FROM users WHERE email = email_address;
+            RETURN user_id;
+        END;
+    $$ LANGUAGE plpgsql;
