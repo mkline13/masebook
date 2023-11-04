@@ -1,6 +1,6 @@
 
 export default function () {
-    const api_logout_controller = (req, res) => {
+    const controller = (req, res) => {
         req.session.user = null;
         
         req.session.save(function (err) {
@@ -13,5 +13,5 @@ export default function () {
         });
     }
 
-    return api_logout_controller;
+    return controller;
 }

@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 
 export default function (db) {
-    const api_login_controller = async (req, res) => {
+    const controller = async (req, res) => {
         // TODO: is this secure?
 
         const client_email = req.body.email;
@@ -33,5 +33,5 @@ export default function (db) {
         });
     }
 
-    return api_login_controller;
+    return controller;
 }
