@@ -33,8 +33,13 @@ export default function createApp(database) {
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
     app.use("/public", express.static(path.join(__dirname, 'public')));
+    app.use((req, res, next) => {
+        // ensures that database is passed to all routes
+        req.db = database;
+        next();
+    });
 
     // Add routes
-    routes(app, database);
+    routes(app);
     return app;
 }
