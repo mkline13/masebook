@@ -10,11 +10,11 @@ CREATE TYPE account_type_t AS ENUM ('user', 'admin');
 CREATE TABLE users (
     id              SERIAL              PRIMARY KEY,
     email           VARCHAR(255)        UNIQUE NOT NULL,
-    hashed_password VARCHAR(255)        NOT NULL, /* TODO: check length of hashed passwords */
+    hashed_password VARCHAR(255)        NOT NULL, -- TODO: check length of hashed passwords
     account_status  account_status_t    NOT NULL DEFAULT 'active',
     account_type    account_type_t      NOT NULL DEFAULT 'user',
-    display_name    title_t             DEFAULT '',
-    show_in_dir     BOOLEAN             NOT NULL DEFAULT true  /* whether or not the user will be shown in the server directory */
+    display_name    title_t             NOT NULL,
+    show_in_dir     BOOLEAN             NOT NULL  -- whether or not the user will be shown in the server directory
 );
 
 /*

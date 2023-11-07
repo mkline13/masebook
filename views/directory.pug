@@ -9,7 +9,7 @@ block content
         ul#userlist
         script.
             const userlist = document.getElementById("userlist");
-            fetch("/api/users")
+            fetch("/api/user")
                 .then(response => {
                     if (response.ok) {
                         return response.json();

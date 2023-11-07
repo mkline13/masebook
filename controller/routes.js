@@ -6,8 +6,8 @@ import space_info_page_controller from './space_info_page_controller.js';
 import {login_controller, logout_controller} from './auth.js';
 
 import api_dashboard_controller from '../controller/api_dashboard_controller.js';
-import api_users_controller from '../controller/api_users_controller.js';
-import {get_spaces, create_space} from '../controller/api_space_controller.js'
+import {get_users, create_user} from './user_api_controllers.js';
+import {get_spaces, create_space} from '../controller/space_api_controllers.js'
 
 // MIDDLEWARE
 function checkAuth(req, res, next) {
@@ -52,13 +52,14 @@ export default function routes(app) {
     app.get("/", checkAuth, user_info_to_locals, dashboard_page_controller);
     app.get("/directory", checkAuth, user_info_to_locals, (_, res) => { res.render('directory'); });
     app.get("/settings", checkAuth, user_info_to_locals, (_, res) => { res.render('settings'); });  // TODO:
-    app.get("/space?s", checkAuth, user_info_to_locals, (_, res) => { res.render('spaces'); });
+    app.get("/space", checkAuth, user_info_to_locals, (_, res) => { res.render('spaces'); });
     app.get("/space/:space_id", checkAuth, user_info_to_locals, space_page_controller);
     app.get("/space/:space_id/info", checkAuth, user_info_to_locals, space_info_page_controller);
 
     // API ROUTES
     app.get("/api/dashboard", checkAuthAPI, api_dashboard_controller);
-    app.get("/api/users", checkAuthAPI, api_users_controller);
+    app.get("/api/user", checkAuthAPI, get_users);
+    app.post("/api/user", checkAuthAPI, create_user);
 
     // TODO:
     app.get("/api/space", checkAuthAPI, get_spaces);

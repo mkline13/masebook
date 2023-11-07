@@ -1,10 +1,10 @@
 extends masebook.pug
 
 block title
-    title Masebook | Your Spaces
+    title Masebook | #{user.display_name}'s Spaces
 
 block content
-    h1 Your Spaces
+    h1 #{user.display_name}'s Spaces
 
     h2 Admin
     ul#admin
