@@ -3,8 +3,8 @@ import login_page_controller from '../controller/login_page_controller.js';
 import space_page_controller from '../controller/space_page_controller.js';
 import space_info_page_controller from './space_info_page_controller.js';
 
-import api_login_controller from '../controller/api_login_controller.js';
-import api_logout_controller from '../controller/api_logout_controller.js';
+import {login_controller, logout_controller} from './auth.js';
+
 import api_dashboard_controller from '../controller/api_dashboard_controller.js';
 import api_users_controller from '../controller/api_users_controller.js';
 import {get_spaces, create_space} from '../controller/api_space_controller.js'
@@ -45,8 +45,8 @@ export default function routes(app) {
 
     // AUTH
     app.get("/login", login_page_controller); // TODO: make login redirect to correct page after successful auth (say user initially tries to go to directory but is redirected to login)
-    app.post("/login", api_login_controller);
-    app.get("/logout", api_logout_controller);
+    app.post("/login", login_controller);
+    app.get("/logout", logout_controller);
 
     // PAGE ROUTES
     app.get("/", checkAuth, user_info_to_locals, dashboard_page_controller);

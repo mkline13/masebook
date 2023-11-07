@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-export default async function api_login_controller(req, res) {
+export async function login_controller(req, res) {
     // TODO: is this secure?
     const client_email = req.body.email;
     const client_password = req.body.password;
@@ -36,5 +36,18 @@ export default async function api_login_controller(req, res) {
         else {
             res.status(401).send('Invalid username or password');
         }
+    });
+}
+
+export function logout_controller(req, res) {
+    req.session.user = null;
+    
+    req.session.save(function (err) {
+        if (err) return next(err);
+
+        req.session.regenerate(function (err) {
+            if (err) next(err);
+            return res.redirect('/');
+        });
     });
 }
