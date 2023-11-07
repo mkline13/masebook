@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 export default function (db) {
     const controller = async (req, res) => {
         // TODO: is this secure?
-
         const client_email = req.body.email;
         const client_password = req.body.password;
 
@@ -11,7 +10,7 @@ export default function (db) {
         const server_result = query_result.rows?.[0];
 
         if (server_result === undefined || server_result.account_status != 'active') {
-            return res.send('Invalid username or password');
+            return res.status(401).send('Invalid username or password');
         }
 
         bcrypt.compare(client_password, server_result.hashed_password, (err, success) => {
@@ -23,12 +22,15 @@ export default function (db) {
 
                     req.session.save(function (err) {
                         if (err) return next(err);
-                        return res.redirect('/');
+                        if (req.query.redirect) {
+                            // Redirects browser to URL specified in "?redirect=" query param
+                            return res.redirect(req.query.redirect); // TODO: hackable by injecting invalid redirect string?
+                        } else return res.redirect('/');
                     });
                 });
             }
             else {
-                res.send('Invalid username or password');
+                res.status(401).send('Invalid username or password');
             }
         });
     }

@@ -7,16 +7,31 @@ html
         link(rel='stylesheet', href='/public/css/normalize.css')
         link(rel='stylesheet', href='/public/css/masebook.css')
     body
-        h1 Masebook
-        form(method="post" action="/api/login")
-            label(for="email") Email:
-            br
-            input#email(type="email" name="email")
-            br
-            br
-            label(for="password") Password:
-            br
-            input#password(type="password" name="password")
-            br
-            br
-            input(type='submit' value='go')
+        div.padbox
+            h1 Masebook
+            form#login_form(method="post" action="/api/login")
+                label(for="email") Email:
+                br
+                input#email(type="email" name="email")
+                br
+                br
+                label(for="password") Password:
+                br
+                input#password(type="password" name="password")
+                br
+                br
+                input(type='submit' value='go')
+            script.
+                const form = document.getElementById("login_form");
+
+                const submit = function(e) {
+                    // get redirect parameter from url bar
+                    const params = new URLSearchParams(window.location.search);
+                    const redirectURL = params.get('redirect');
+                    if (redirectURL) {
+                        e.preventDefault();
+                        form.action = `/api/login?redirect=${redirectURL}`;
+                        form.submit();
+                    }
+                }
+                form.addEventListener("submit", submit, false);

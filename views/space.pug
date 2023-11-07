@@ -1,0 +1,10 @@
+extends masebook.pug
+
+block title
+    title Masebook | #{space.name}
+
+block content
+    a(href="/space/" + space.id + "/info") info
+    h1 #{space.name}
+    p #{space.description} &nbsp;
+    h2 Posts

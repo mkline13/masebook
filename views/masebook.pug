@@ -15,17 +15,10 @@ html
                     a(href="/") Masebook 
             aside.grid-item#sidebar
                 ul
-                    li Messages [#{user.new_messages}]
-                    li Your spaces
-                        ul
-                            each space in user.spaces
-                                li= space
-                    li Memberships
-                        ul
-                            each space in user.member_of
-                                li= space
                     li
-                        a(href="/directory") User Directory
+                        a(href="/spaces") Spaces
+                    li
+                        a(href="/directory") Users
                     li
                         a(href="/settings") Settings
                     li

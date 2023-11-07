@@ -1,16 +1,27 @@
 import dashboard_page_controller from '../controller/dashboard_page_controller.js';
 import login_page_controller from '../controller/login_page_controller.js';
+import space_page_controller from '../controller/space_page_controller.js';
+import space_info_page_controller from './space_info_page_controller.js';
 
 import api_login_controller from '../controller/api_login_controller.js';
 import api_logout_controller from '../controller/api_logout_controller.js';
 import api_dashboard_controller from '../controller/api_dashboard_controller.js';
 import api_users_controller from '../controller/api_users_controller.js';
-import api_space_get from '../controller/api_space_get_controller.js'
+import {get_spaces, create_space} from '../controller/api_space_controller.js'
 
 // MIDDLEWARE
 function checkAuth(req, res, next) {
     if (req.session.user) next();
-    else res.redirect('/login');
+    else {
+        const url = req.url;
+        if (url == "/") {
+            res.redirect('/login');
+        }
+        else {
+            const encodedURL = encodeURIComponent(url);
+            res.redirect(`/login?redirect=${encodedURL}`);
+        }
+    }
 }
 
 function checkAuthAPI(req, res, next) {
@@ -57,8 +68,11 @@ export default function routes(app, db) {
     // PAGE ROUTES
     app.get("/", checkAuth, getSidebarData, dashboard_page_controller(db));
     app.get("/login", login_page_controller()); // TODO: make login redirect to correct page after successful auth (say user initially tries to go to directory but is redirected to login)
-    app.get("/directory", checkAuth, getSidebarData, (req, res) => { res.render('directory'); });
-    app.get("/settings", checkAuth, create_dummy_response("settings page"));  // TODO:
+    app.get("/directory", checkAuth, getSidebarData, (_, res) => { res.render('directory'); });
+    app.get("/settings", checkAuth, getSidebarData, (_, res) => { res.render('settings'); });  // TODO:
+    app.get("/space?s", checkAuth, getSidebarData, (_, res) => { res.render('spaces'); });
+    app.get("/space/:space_id", checkAuth, getSidebarData, space_page_controller(db));
+    app.get("/space/:space_id/info", checkAuth, getSidebarData, space_info_page_controller(db));
 
     // API ROUTES
     app.post("/api/login", api_login_controller(db));
@@ -67,8 +81,8 @@ export default function routes(app, db) {
     app.get("/api/users", checkAuthAPI, api_users_controller(db));
 
     // TODO:
-    app.get("/api/space", checkAuthAPI, getClientUserInfo, api_space_get(db));
-    app.post("/api/space", checkAuthAPI, getClientUserInfo, create_dummy_response("create new space"));
+    app.get("/api/space", checkAuthAPI, getClientUserInfo, get_spaces(db));
+    app.post("/api/space", checkAuthAPI, getClientUserInfo, create_space(db));
 
     app.get("/api/space/:space_id(\d+)", checkAuthAPI, create_dummy_response("/api/space/:space_id GET [retrieves posts in a space]"));
     app.post("/api/space/:space_id(\d+)", checkAuthAPI, create_dummy_response("/api/space/:space_id POST [creates new post in a space]"));

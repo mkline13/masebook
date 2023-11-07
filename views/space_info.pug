@@ -1,0 +1,16 @@
+extends masebook.pug
+
+block title
+    title Masebook | #{space.name} info
+
+block content
+    a(href="/space/" + space.id) back
+    h1 #{space.name}
+    h2 Description
+    p #{space.description}
+    h3 Members [#{space.member_count}]
+    ul
+        each person in people
+            li
+                a(href="/user/" + person.id) #{person.name}
+                span.role [#{person.role}]

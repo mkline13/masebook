@@ -1,0 +1,56 @@
+extends masebook.pug
+
+block title
+    title Masebook | Your Spaces
+
+block content
+    h1 Your Spaces
+
+    h2 Admin
+    ul#admin
+    h2 Member
+    ul#member
+    h2 Follower
+    ul#follower
+    script.
+        const admin = document.getElementById("admin");
+        const member = document.getElementById("member");
+        const follower = document.getElementById("follower");
+        fetch("/api/space")
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                else {
+                    throw new Error("Failed to fetch data.");
+                }
+            })
+            .then(data => {
+                // alphabetize
+                data.sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                });
+
+                data.forEach(space => {
+                    const li = document.createElement("li");
+                    const a = document.createElement("a");
+                    a.href = `/space/${space.id}`;
+                    a.textContent = space.name;
+                    li.appendChild(a);
+
+                    switch (space.role) {
+                        case "member":
+                            member.appendChild(li);
+                            break;
+                        case "moderator":
+                        case "administrator":
+                        case "owner":
+                            const role = document.createElement("span");
+                            role.classList.add("role");
+                            role.textContent = `[${space.role}]`;
+                            li.appendChild(role);
+                            admin.appendChild(li);
+                            break;
+                    }
+                });
+            })

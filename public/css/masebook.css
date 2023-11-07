@@ -5,6 +5,10 @@
     --corner-rounding: 0.2em;
 }
 
+.padbox {
+    padding: 1em;
+}
+
 body {
     background-color: white;
 }
@@ -17,8 +21,7 @@ body {
 }
 
 main {
-    padding-left: 1em;
-    padding-right: 1em;
+    padding: 1em;
     overflow: scroll;
 }
 
@@ -84,8 +87,9 @@ article.post > h4 > .post-date {
     font-weight: normal;
 }
 
-article.post > h4 > .post-date {
-
+span.role {
+    font-size: 80%;
+    padding-left: 1.0em;
 }
 
 /* === POKE BUTTONS === */
