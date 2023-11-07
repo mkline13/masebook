@@ -1,6 +1,6 @@
 
 import express from 'express';
-import sessions from 'express-session';
+import session from 'express-session';
 import path from 'path';
 import routes from './controller/routes.js';
 
@@ -20,7 +20,7 @@ export default function createApp(database) {
     }
 
     // Install middleware
-    app.use(sessions({
+    app.use(session({
         secret: process.env.SESSION_SECRET,
         cookie: {
             maxAge: 1000 * 60 * 60 * 24, // 24 hours

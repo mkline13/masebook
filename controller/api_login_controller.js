@@ -5,19 +5,24 @@ export default async function api_login_controller(req, res) {
     const client_email = req.body.email;
     const client_password = req.body.password;
 
-    const qres = await req.db.query("SELECT email, hashed_password, account_status FROM users WHERE email = $1;", [client_email]);
-    const server_result = qres.rows?.[0];
+    const qres = await req.db.query("SELECT id, email, hashed_password, account_status, account_type, display_name FROM users WHERE email = $1;", [client_email]);
+    const server_user = qres.rows?.[0];
 
-    if (server_result === undefined || server_result.account_status != 'active') {
+    if (server_user === undefined || server_user.account_status != 'active') {
         return res.status(401).send('Invalid username or password');
     }
 
-    bcrypt.compare(client_password, server_result.hashed_password, (err, success) => {
+    bcrypt.compare(client_password, server_user.hashed_password, (err, success) => {
         if (success) {
             req.session.regenerate(function (err) {
                 if (err) next(err);
 
-                req.session.user = req.body.email;
+                req.session.user = {
+                    id: server_user.id,
+                    email: server_user.email,
+                    account_type: server_user.account_type,
+                    display_name: server_user.display_name,
+                };
 
                 req.session.save(function (err) {
                     if (err) return next(err);
