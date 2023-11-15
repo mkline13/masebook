@@ -8,9 +8,9 @@ export async function get_spaces(req, res) {
 
 export async function create_space(req, res)  {
     const user = req.session.user;
-    const text = "SELECT create_space($1, $2, $3);";
+    const sql = "SELECT create_space($1, $2, $3);";
     const values = [user.id, req.body.name, req.body.description];
-    const qres = await req.db.query(text, values);
+    const qres = await req.db.query(sql, values);
     const result = {new_space: qres.rows};
     res.json(result);
 }

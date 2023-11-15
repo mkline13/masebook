@@ -6,7 +6,7 @@ CREATE DOMAIN description_t AS VARCHAR(256);
  * USERS
  */
 CREATE TYPE account_status_t AS ENUM ('active', 'inactive');
-CREATE TYPE account_type_t AS ENUM ('user', 'admin');
+CREATE TYPE account_type_t AS ENUM ('user', 'administrator');
 CREATE TABLE users (
     id              SERIAL              PRIMARY KEY,
     email           VARCHAR(255)        UNIQUE NOT NULL,
@@ -127,7 +127,7 @@ $$ LANGUAGE plpgsql;
 /* space info to be displayed in the /space or /space_info pages */
 CREATE OR REPLACE VIEW space_info AS
 SELECT s.id, m.user_id AS owner_id, user_to_name(m.user_id) AS owner_name, s.name, s.description, s.creation_date,
-    (SELECT COUNT(*) AS member_count FROM memberships WHERE space_id=s.id)
+    (SELECT COUNT(*) FROM memberships WHERE space_id=s.id) AS member_count
 FROM spaces s
 LEFT JOIN memberships m ON m.space_id = s.id
 WHERE m.role = 'owner';

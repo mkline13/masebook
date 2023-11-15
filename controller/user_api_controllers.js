@@ -7,6 +7,13 @@ export async function get_users(req, res) {
 
 const saltRounds = 10;
 export async function create_user(req, res) {
+    // check that user is allowed to do this action
+    const user = req.session.user;
+    if (user.account_type != 'administrator') {
+        res.status(401).send("User is not authorized to create other users");
+        return;
+    }
+
     // TODO: validate / prep these fields for storage
     const email = req.body.email;
     const password = req.body.password;
@@ -15,8 +22,8 @@ export async function create_user(req, res) {
 
     const hashed_password = await bcrypt.hash(password, saltRounds);
 
-    const qtext = "INSERT INTO users(email, hashed_password, display_name, show_in_dir) VALUES($1, $2, $3, $4) RETURNING id, email, display_name, show_in_dir;";
+    const sql = "INSERT INTO users(email, hashed_password, display_name, show_in_dir) VALUES($1, $2, $3, $4) RETURNING id, email, display_name, show_in_dir;";
     const values = [email, hashed_password, display_name, show_in_dir];
-    const qres = await req.db.query(qtext, values);
+    const qres = await req.db.query(sql, values);
     res.json(qres.rows[0]);
 }

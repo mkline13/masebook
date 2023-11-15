@@ -8,6 +8,7 @@ export async function login_controller(req, res) {
     const qres = await req.db.query("SELECT id, email, hashed_password, account_status, account_type, display_name FROM users WHERE email = $1;", [client_email]);
     const server_user = qres.rows?.[0];
 
+    //TODO: Lookup "user login timing attack username enumeration"
     if (server_user === undefined || server_user.account_status != 'active') {
         return res.status(401).send('Invalid username or password');
     }
@@ -26,7 +27,7 @@ export async function login_controller(req, res) {
 
                 req.session.save(function (err) {
                     if (err) return next(err);
-                    if (req.query.redirect) {
+                    if (req.query.redirect && req.query.redirect.charAt(0) == "/") { // ensure redirect doesn't leave site
                         // Redirects browser to URL specified in "?redirect=" query param
                         return res.redirect(req.query.redirect); // TODO: hackable by injecting invalid redirect string?
                     } else return res.redirect('/');
