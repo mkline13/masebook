@@ -19,7 +19,7 @@ html
         div.grid-container
             header.grid-item#page-header
                 h1
-                    a(href="/") Masebook 
+                    a.unstyled(href="/") Masebook 
             aside.grid-item#sidebar
                 ul
                     li
@@ -31,4 +31,9 @@ html
                     li
                         a(href="/logout") Log Out
             main.grid-item#content
+                if page_alerts
+                    each alert in page_alerts
+                        p.alert(class=alert.severity)
+                            span.alert #{alert.severity}:
+                            | #{alert.message}
                 block content

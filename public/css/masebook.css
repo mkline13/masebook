@@ -2,7 +2,6 @@
     --poke-color: yellow;
     --slap-color: red;
     --tickle-color: magenta;
-    --corner-rounding: 0.2em;
 }
 
 .padbox {
@@ -13,11 +12,10 @@ body {
     background-color: white;
 }
 
-#main-header {
+#page-header {
     padding-left: 1em;
     padding-right: 1em;
     background-color: #f3f8ff;
-    border-radius: var(--corner-rounding);
 }
 
 main {
@@ -27,7 +25,6 @@ main {
 
 #sidebar {
     background-color: #f3f8ff;
-    border-radius: var(--corner-rounding);
 }
 
 .grid-container {
@@ -38,7 +35,7 @@ main {
     grid-template-areas:
         "header main"
         "sidebar main";
-    grid-gap: 0.2em;
+    grid-gap: 0;
 }
 
 /* .grid-item {
@@ -131,6 +128,35 @@ button.poke.tickle {
 
 button.poke.hide {
     color: white;
+}
+
+a.unstyled {
+    color: unset;
+    text-decoration: unset;
+}
+
+
+
+p.alert {
+    margin: 0;
+    padding: 0.2em;
+}
+
+span.alert {
+    display: inline-block;
+    width: 5em;
+}
+
+p.alert.critical {
+    background-color: red;
+}
+
+p.alert.warning {
+    background-color: yellow;
+}
+
+p.alert.info {
+    background-color: lightgreen;
 }
 
 @media only screen and (max-width: 768px) {
