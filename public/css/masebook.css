@@ -57,6 +57,20 @@ main {
     grid-area: main;
 }
 
+button.link-style {
+    background: none!important;
+    border: none;
+    padding: 0!important;
+    color: #069;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+    visibility: hidden;
+}
+
 
 /* === POSTS === */
 article.post {

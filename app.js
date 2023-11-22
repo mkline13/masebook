@@ -13,6 +13,7 @@ export default function createApp(database) {
     app.set('view engine', 'pug');
 
     // Configure session settings
+    // TODO: Fix
     process.env.SESSION_SECRET = process.env.SESSION_SECRET ?? "none";
 
     if (process.env.SESSION_SECRET == "none") {

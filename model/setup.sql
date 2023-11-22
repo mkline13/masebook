@@ -14,6 +14,7 @@ CREATE TABLE users (
     account_status  account_status_t    NOT NULL DEFAULT 'active',
     account_type    account_type_t      NOT NULL DEFAULT 'user',
     display_name    title_t             NOT NULL,
+    description     description_t       DEFAULT '',
     show_in_dir     BOOLEAN             NOT NULL  -- whether or not the user will be shown in the server directory
 );
 
@@ -21,22 +22,16 @@ CREATE TABLE users (
  *  SPACES:
  *      Spaces are where users can pass back and forth messages to each other. They can either be used for direct messages, group pages, or even user walls.
  */
+CREATE TYPE role_t AS ENUM ('member', 'moderator', 'administrator', 'owner');
 CREATE TABLE spaces (
     id                  SERIAL              PRIMARY KEY,
     name                title_t             NOT NULL,
     description         description_t       DEFAULT '',
     creation_date       TIMESTAMP           NOT NULL DEFAULT now(),
-    /* SETTINGS */
-    is_public           BOOLEAN             NOT NULL DEFAULT false,  /* whether or not users outside of the space can see the content within */
-    is_visible_in_dir   BOOLEAN             NOT NULL DEFAULT false   /* whether or not the space will be shown in the server directory */
-);
-
-/* TODO: not sure if I'm going to use this */
-CREATE DOMAIN key_t AS VARCHAR(16);
-CREATE TABLE space_settings (
-    space_id    INTEGER     NOT NULL REFERENCES spaces ON DELETE CASCADE,
-    key         key_t       NOT NULL,
-    value       INTEGER     NOT NULL
+    show_in_dir         BOOLEAN             NOT NULL,    /* will the space be shown in the server directory? */
+    /* PERMISSIONS */
+    read_perm           role_t              DEFAULT 'member',   /* the lowest credential required to read posts */
+    write_perm          role_t              DEFAULT 'member'    /* the lowest credential required to create posts */
 );
 
 
@@ -44,11 +39,10 @@ CREATE TABLE space_settings (
  *  MEMBERSHIPS:
  *      Defines a user's credential level within a particular space.
  */
-CREATE TYPE role_t AS ENUM ('member', 'moderator', 'administrator', 'owner');
 CREATE TABLE memberships (
     user_id         INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
     space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
-    role            role_t              NOT NULL DEFAULT 'member',  /* the role of the user within a space */
+    user_role       role_t              NOT NULL DEFAULT 'member',  /* the role of the user within a space */
     CONSTRAINT pkey PRIMARY KEY (user_id, space_id)
     /* TODO add unique constraint to space_id / user_id so only one per user */
 );
@@ -63,7 +57,7 @@ CREATE TABLE posts (
     author_id       INT                 NOT NULL REFERENCES users,
     allow_comments  BOOLEAN             NOT NULL,
     allow_reactions BOOLEAN             NOT NULL,
-    creation_date   TIMESTAMP           NOT NULL,
+    creation_date   TIMESTAMP           NOT NULL DEFAULT now(),
     contents        VARCHAR             NOT NULL
 );
 
@@ -129,19 +123,18 @@ CREATE OR REPLACE VIEW space_info AS
 SELECT s.id, m.user_id AS owner_id, user_to_name(m.user_id) AS owner_name, s.name, s.description, s.creation_date,
     (SELECT COUNT(*) FROM memberships WHERE space_id=s.id) AS member_count
 FROM spaces s
-LEFT JOIN memberships m ON m.space_id = s.id
-WHERE m.role = 'owner';
+LEFT JOIN memberships m ON m.space_id = s.id AND m.user_role = 'owner';
 
 /* fn for creating a user and assigning them the owner role in a single transaction */
-CREATE OR REPLACE FUNCTION create_space(owner_id INT, space_name title_t, space_desc description_t)
+CREATE OR REPLACE FUNCTION create_space(owner_id INT, space_name title_t, space_desc description_t, show_in_dir_ BOOLEAN)
 RETURNS INT AS $$
 DECLARE new_space_id INT;
 BEGIN
     BEGIN
-        INSERT INTO spaces(name, description) VALUES (space_name, space_desc)
+        INSERT INTO spaces(name, description, show_in_dir) VALUES (space_name, space_desc, show_in_dir_)
         RETURNING id INTO new_space_id;
 
-        INSERT INTO memberships(space_id, user_id, role) VALUES (new_space_id, owner_id, 'owner');
+        INSERT INTO memberships(space_id, user_id, user_role) VALUES (new_space_id, owner_id, 'owner');
     EXCEPTION WHEN OTHERS THEN
         ROLLBACK;
         RAISE;
@@ -151,7 +144,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 /* get user's member spaces */
-
 CREATE OR REPLACE FUNCTION get_member_spaces(user_id_ INT)
 RETURNS TABLE(
     user_id INT,
@@ -163,9 +155,16 @@ RETURNS TABLE(
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT m.user_id, m.role, s.id, s.name, s.description, s.creation_date
+    SELECT m.user_id, m.user_role, s.id, s.name, s.description, s.creation_date
     FROM spaces s
     LEFT JOIN memberships m ON m.space_id = s.id
-    WHERE m.user_id = user_id_;
+    WHERE m.user_id = user_id_
+    ORDER BY m.user_role, s.name;
 END;
 $$ LANGUAGE plpgsql;
+
+/* determine if a user has access to a particular space */
+CREATE OR REPLACE VIEW space_permissions AS
+SELECT m.user_id, m.space_id, (m.user_role >= s.read_perm) AS read_permission, (m.user_role >= s.write_perm) AS write_permission
+FROM memberships m
+LEFT JOIN spaces s ON m.space_id = s.id;

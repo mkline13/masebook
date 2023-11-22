@@ -8,12 +8,12 @@ INSERT INTO users(email, hashed_password, display_name, account_type, show_in_di
     ('scooby@gmail.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'Scooby Dooby', 'user', true);
 
 /* spaces */
-SELECT create_space(email_to_user('mkline13@gmail.com'), 'A brand new space', 'So new! So cool!');
-SELECT create_space(email_to_user('mkline13@gmail.com'), 'A cool space', 'Pretty cool!');
-SELECT create_space(email_to_user('mkline13@gmail.com'), 'Ze best space', 'Oui oui!');
-SELECT create_space(email_to_user('basin@basin.com'), 'A dumb space', 'Ugh, why??');
-SELECT create_space(email_to_user('scooby@gmail.com'), 'Just a normal space', 'Nothing to see here :)');
-SELECT create_space(email_to_user('scooby@gmail.com'), 'A pathetic waste of a space', 'Ewwwww');
+SELECT create_space(email_to_user('mkline13@gmail.com'), 'A brand new space', 'So new! So cool!', true);
+SELECT create_space(email_to_user('mkline13@gmail.com'), 'A cool space', 'Pretty cool!', true);
+SELECT create_space(email_to_user('mkline13@gmail.com'), 'Ze best space', 'Oui oui!', true);
+SELECT create_space(email_to_user('basin@basin.com'), 'A dumb space', 'Ugh, why??', true);
+SELECT create_space(email_to_user('scooby@gmail.com'), 'Just a normal space', 'Nothing to see here :)', true);
+SELECT create_space(email_to_user('scooby@gmail.com'), 'A pathetic waste of a space', 'Ewwwww', true);
 
 INSERT INTO memberships(user_id, space_id) VALUES
     (email_to_user('mkline13@gmail.com'), 6),
@@ -22,6 +22,15 @@ INSERT INTO memberships(user_id, space_id) VALUES
     (email_to_user('mason@mason.mason'), 3),
     (email_to_user('basin@basin.com'), 1);
 
-INSERT INTO memberships(user_id, space_id, role) VALUES
+INSERT INTO memberships(user_id, space_id, user_role) VALUES
     (email_to_user('mkline13@gmail.com'), 4, 'administrator'),
     (email_to_user('mkline13@gmail.com'), 5, 'moderator');
+
+
+INSERT INTO posts(author_id, space_id, allow_comments, allow_reactions, contents) VALUES
+    (email_to_user('mkline13@gmail.com'), 1, false, false, 'Hello world!'),
+    (email_to_user('basin@basin.com'), 1, false, false, 'Hi world!'),
+    (email_to_user('mkline13@gmail.com'), 1, false, false, 'Gooby!'),
+    (email_to_user('mason@mason.mason'), 1, false, false, 'Sup world!'),
+    (email_to_user('mkline13@gmail.com'), 1, false, false, 'Ugggo!'),
+    (email_to_user('mkline13@gmail.com'), 1, false, false, 'Where are my pants?');

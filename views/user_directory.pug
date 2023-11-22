@@ -1,0 +1,17 @@
+extends masebook.pug
+
+block title
+    title Masebook | Directory
+
+mixin user(u)
+    li
+        a(href="/users/" + u.id)= u.display_name
+        if u.account_type === "administrator"
+            span.role [administrator]
+
+block content
+    section
+        h1 Server Directory
+        ul
+            for u in users
+                +user(u)

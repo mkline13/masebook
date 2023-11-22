@@ -4,7 +4,26 @@ block title
     title Masebook | #{space.name}
 
 block content
-    a(href="/space/" + space.id + "/info") info
     h1 #{space.name}
     p #{space.description} &nbsp;
+    button.link-style(onclick="toggleInfo()") info
+    #info.hidden
+        h3 Members [#{space.member_count}]
+        ul
+            each person in people
+                li
+                    a(href="/users/" + person.id) #{person.name}
+                    if person.user_role != 'member'
+                        span.role [#{person.user_role}]
     h2 Posts
+    if posts.length > 0
+        each p in posts
+            +post(p.author_name, p.contents, p.creation_date)
+    else
+        p no posts to show...
+
+    script.
+        const info = document.getElementById('info');
+        function toggleInfo() {
+            info.classList.toggle('hidden');
+        }

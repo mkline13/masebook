@@ -5,8 +5,8 @@ export async function login_controller(req, res) {
     const client_email = req.body.email;
     const client_password = req.body.password;
 
-    const qres = await req.db.query("SELECT id, email, hashed_password, account_status, account_type, display_name FROM users WHERE email = $1;", [client_email]);
-    const server_user = qres.rows?.[0];
+    const query = await req.db.query("SELECT id, email, hashed_password, account_status, account_type, display_name FROM users WHERE email = $1;", [client_email]);
+    const server_user = query.rows?.[0];
 
     //TODO: Lookup "user login timing attack username enumeration"
     if (server_user === undefined || server_user.account_status != 'active') {

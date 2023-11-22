@@ -1,3 +1,10 @@
+mixin post(author, content, date)
+    article.post
+        img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="32" height="32")
+        h4= author
+            span.post-date  • #{date}
+        p= content
+
 doctype html
 html
     head
@@ -16,9 +23,9 @@ html
             aside.grid-item#sidebar
                 ul
                     li
-                        a(href="/space") Spaces
+                        a(href="/spaces") Spaces
                     li
-                        a(href="/directory") Users
+                        a(href="/users") Users
                     li
                         a(href="/settings") Settings
                     li

@@ -17,7 +17,8 @@ block scripts
         }
 
 block content
-    if pokes
+    h1 Dashboard
+    if pokes.length > 0
         section
             h3 Pokes
             ul
@@ -29,13 +30,9 @@ block content
                         button.poke.hide(onclick="hidePoke()" data-poke-id=poke.id) ╳
     section
         h3 Feed
-        if feed
+        if feed.length > 0
             div
-                each post in feed
-                    article.post
-                        img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="32" height="32")
-                        h4= post.author
-                            span.post-date  • #{post.date}
-                        p= post.content
+                each p in feed
+                    +post(p.author, p.content, p.date)
         else
             p Nothing here...

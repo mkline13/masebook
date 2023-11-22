@@ -1,0 +1,12 @@
+extends masebook.pug
+
+block title
+    title Masebook | #{profile.display_name}
+
+block content
+    h1 #{profile.display_name}
+    img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="64" height="64")
+    if profile.description
+        p #{profile.description} &nbsp;
+    else
+        p no description...
