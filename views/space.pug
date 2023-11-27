@@ -6,24 +6,37 @@ block title
 block content
     h1 #{space.name}
     p #{space.description} &nbsp;
-    button.link-style(onclick="toggleInfo()") info
-    #info.hidden
-        h3 Members [#{space.member_count}]
-        ul
-            each person in people
-                li
-                    a(href="/users/" + person.id) #{person.name}
-                    if person.user_role != 'member'
-                        span.role [#{person.user_role}]
-    h2 Posts
-    if posts.length > 0
-        each p in posts
-            +post(p.author_name, p.contents, p.creation_date)
-    else
-        p no posts to show...
 
-    script.
-        const info = document.getElementById('info');
-        function toggleInfo() {
-            info.classList.toggle('hidden');
-        }
+    if space.can_view_member_list
+        button.link-style(onclick="toggleInfo()") info
+        #info.hidden
+            h3 Members [#{people.length}]
+            ul
+                each person in people
+                    li
+                        a(href="/users/" + person.id) #{person.name}
+                        if person.role != 'member'
+                            span.role [#{person.role}]
+        script.
+            const info = document.getElementById('info');
+            function toggleInfo() {
+                info.classList.toggle('hidden');
+            }
+    if space.can_view_posts
+        h2 Posts
+    
+    if space.can_create_posts
+        div.padbox
+            p Posting as #{user.display_name}...
+            form#new_post_form(method='post')
+                textarea(name='post')
+                br
+                input(type='submit' value='go')
+
+    
+    if space.can_view_posts
+        if posts.length > 0
+            each p in posts
+                +post(p.author_name, p.contents, p.creation_date)
+        else
+            p no posts to show...

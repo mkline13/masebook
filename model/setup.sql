@@ -25,13 +25,22 @@ CREATE TABLE users (
 CREATE TYPE role_t AS ENUM ('member', 'moderator', 'administrator', 'owner');
 CREATE TABLE spaces (
     id                  SERIAL              PRIMARY KEY,
+    creation_date       TIMESTAMP           NOT NULL DEFAULT now(),
     name                title_t             NOT NULL,
     description         description_t       DEFAULT '',
-    creation_date       TIMESTAMP           NOT NULL DEFAULT now(),
-    show_in_dir         BOOLEAN             NOT NULL,    /* will the space be shown in the server directory? */
+
+    /* SETTINGS */
+    visible             BOOLEAN             DEFAULT false NOT NULL, -- can other server members see the space?
+    show_in_dir         BOOLEAN             DEFAULT false NOT NULL,  -- will the space be displayed in the server directory
+    
     /* PERMISSIONS */
-    read_perm           role_t              DEFAULT 'member',   /* the lowest credential required to read posts */
-    write_perm          role_t              DEFAULT 'member'    /* the lowest credential required to create posts */
+    view_member_list    role_t      DEFAULT 'member',
+    view_posts          role_t      DEFAULT 'member',
+    create_posts        role_t      DEFAULT 'member',
+    delete_posts        role_t      DEFAULT 'moderator' CHECK (delete_posts > 'member'::role_t),
+    view_comments       role_t      DEFAULT 'member',
+    create_comments     role_t      DEFAULT 'member',
+    delete_comments     role_t      DEFAULT 'moderator' CHECK (delete_comments > 'member'::role_t)
 );
 
 
@@ -44,7 +53,6 @@ CREATE TABLE memberships (
     space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
     user_role       role_t              NOT NULL DEFAULT 'member',  /* the role of the user within a space */
     CONSTRAINT pkey PRIMARY KEY (user_id, space_id)
-    /* TODO add unique constraint to space_id / user_id so only one per user */
 );
 
 /*
@@ -55,8 +63,8 @@ CREATE TABLE posts (
     id              SERIAL              PRIMARY KEY,
     space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
     author_id       INT                 NOT NULL REFERENCES users,
-    allow_comments  BOOLEAN             NOT NULL,
-    allow_reactions BOOLEAN             NOT NULL,
+    allow_comments  BOOLEAN             DEFAULT false NOT NULL,
+    allow_reactions BOOLEAN             DEFAULT false NOT NULL,
     creation_date   TIMESTAMP           NOT NULL DEFAULT now(),
     contents        VARCHAR             NOT NULL
 );
@@ -126,12 +134,12 @@ FROM spaces s
 LEFT JOIN memberships m ON m.space_id = s.id AND m.user_role = 'owner';
 
 /* fn for creating a user and assigning them the owner role in a single transaction */
-CREATE OR REPLACE FUNCTION create_space(owner_id INT, space_name title_t, space_desc description_t, show_in_dir_ BOOLEAN)
+CREATE OR REPLACE FUNCTION create_space(owner_id INT, space_name title_t, space_desc description_t)
 RETURNS INT AS $$
 DECLARE new_space_id INT;
 BEGIN
     BEGIN
-        INSERT INTO spaces(name, description, show_in_dir) VALUES (space_name, space_desc, show_in_dir_)
+        INSERT INTO spaces(name, description) VALUES (space_name, space_desc)
         RETURNING id INTO new_space_id;
 
         INSERT INTO memberships(space_id, user_id, user_role) VALUES (new_space_id, owner_id, 'owner');
@@ -163,8 +171,42 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-/* determine if a user has access to a particular space */
-CREATE OR REPLACE VIEW space_permissions AS
-SELECT m.user_id, m.space_id, (m.user_role >= s.read_perm) AS read_permission, (m.user_role >= s.write_perm) AS write_permission
-FROM memberships m
-LEFT JOIN spaces s ON m.space_id = s.id;
+/* load space info and calculate user's permissions */
+CREATE OR REPLACE FUNCTION get_space_info_with_user_context(user_id_ INT, space_id_ INT)
+RETURNS TABLE(
+    id                      INT,
+    creation_date           TIMESTAMP,
+    name                    title_t,
+    description             description_t,
+
+    /* SETTINGS */
+    is_visible              BOOLEAN,
+    is_shown_in_dir         BOOLEAN,
+
+    /* PERMISSIONS */
+    can_view_member_list    BOOLEAN,
+    can_view_posts          BOOLEAN,
+    can_create_posts        BOOLEAN,
+    can_delete_posts        BOOLEAN,
+    can_view_comments       BOOLEAN,
+    can_create_comments     BOOLEAN,
+    can_delete_comments     BOOLEAN
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        s.id, s.creation_date, s.name, s.description,
+        (m.user_role IS NOT NULL OR s.visible)              AS is_visible,
+        (m.user_role IS NOT NULL OR s.show_in_dir)          AS is_shown_in_dir,
+        coalesce(m.user_role >= s.view_member_list, false)  AS can_view_member_list,
+        coalesce(m.user_role >= s.view_posts, false)        AS can_view_posts,
+        coalesce(m.user_role >= s.create_posts, false)      AS can_create_posts,
+        coalesce(m.user_role >= s.delete_posts, false)      AS can_delete_posts,
+        coalesce(m.user_role >= s.view_comments, false)     AS can_view_comments,
+        coalesce(m.user_role >= s.create_comments, false)   AS can_create_comments,
+        coalesce(m.user_role >= s.delete_comments, false)   AS can_delete_comments
+    FROM spaces s
+    LEFT JOIN memberships m ON m.space_id=s.id AND m.user_id=user_id_
+    WHERE s.id=space_id_;
+END;
+$$ LANGUAGE plpgsql;
