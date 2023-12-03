@@ -9,6 +9,7 @@ Currently, Masebook is serving the purpose of teaching me how to write a CRUD we
 ## How it's made
 
 Front end: vanilla JS / HTML / CSS
+
 Back end: Node.js, Express, PostgreSQL, Bcrypt.js
 
 ## Current status
