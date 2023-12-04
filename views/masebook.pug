@@ -1,12 +1,17 @@
+mixin text2paragraphs(text)
+    - const paragraphs = text.split(/\r?\n/);
+    each para in paragraphs
+        p= para
+
+
 mixin post(author, content, date)
     article.post
         img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="32" height="32")
         h4= author
             span.post-date  • #{date}
         .content
-            - const paragraphs = content.split(/\r?\n/);
-            each para in paragraphs
-                p= para
+            +text2paragraphs(content)
+            
 
 doctype html
 html
