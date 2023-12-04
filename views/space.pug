@@ -23,19 +23,18 @@ block content
                 info.classList.toggle('hidden');
             }
     
-    if space.can_create_posts
-        button.link-style#post_editor_button(onclick="togglePostEditor()") create post
-    
-    if space.can_view_posts
+    if space.can_view_posts || space.can_create_posts
         h2 Posts
     
     if space.can_create_posts
-        form#new_post_form.hidden(method='post')
-            label(for='post') Posting as #{user.display_name}...
-            .post-text-padding
-                textarea.post-text(name='post', wrap='hard', oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
-            input(type='submit' value='post') 
-            input(type='reset', onclick="togglePostEditor()", value='cancel')
+        .spacer
+            button.link-style#post_editor_button(onclick="togglePostEditor()") create post
+            form#new_post_form.hidden(method='post')
+                label(for='post') Posting as #{user.display_name}...
+                .post-text-padding
+                    textarea.post-text(name='post', wrap='hard', oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
+                input(type='submit' value='post') 
+                input(type='reset', onclick="togglePostEditor()", value='cancel')
 
         script.
             const postEditor = document.getElementById('new_post_form');
