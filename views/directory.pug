@@ -17,22 +17,32 @@ mixin space(s)
 
 block content
     h1 Server Directory
-    section.hidden#users
-        button.link-style(onclick="toggleUsersSpaces()") spaces
+    button.link-style#toggle-users(onclick="toggle(this)", data-target="users") hide users
+    button.link-style#toggle-spaces(onclick="toggle(this)", data-target="spaces") hide spaces
+    section#users
         h2 Users
-        ul
-            for u in users
-                +user(u)
+        if users
+            ul
+                for u in users
+                    +user(u)
+        else
+            p no users...
     section#spaces
-        button.link-style(onclick="toggleUsersSpaces()") users
         h2 Spaces
-        ul
-            for s in spaces
-                +space(s)
+        if spaces
+            ul
+                for s in spaces
+                    +space(s)
+        else
+            p no spaces...
     script.
-        const users = document.getElementById('users');
-        const spaces = document.getElementById('spaces');
-        function toggleUsersSpaces() {
-            users.classList.toggle('hidden');
-            spaces.classList.toggle('hidden');
+        function toggle(button) {
+            // swap button text
+            button.textContent = button.textContent.replace(/show|hide/g, (val) => { return val === 'show' ? 'hide' : 'show'; })
+
+            // toggle target element
+            const target = document.getElementById(button.dataset.target);
+            target.classList.toggle('hidden');
         }
+
+        
