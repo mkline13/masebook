@@ -68,6 +68,23 @@ button.link-style {
     visibility: hidden;
 }
 
+.content {
+    max-width: 50em;
+}
+
+textarea {
+    resize: none;
+}
+
+textarea.post-text {
+    width: 100%;
+}
+
+.post-text-padding {
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
 
 /* === POSTS === */
 article.post {
@@ -86,10 +103,15 @@ article.post > img {
 article.post > h4 {
     grid-area: 1 / 2;
     margin: 0;
+    margin-bottom: 0.5em;
 }
 
-article.post > p {
+article.post > .content {
     grid-area: 2 / 2;
+    margin: 0;
+}
+
+article.post > .content > p {
     margin: 0;
 }
 
@@ -101,6 +123,10 @@ article.post > h4 > .post-date {
 span.role {
     font-size: 80%;
     padding-left: 1.0em;
+}
+
+#new_post_form {
+    margin-bottom: 1em;
 }
 
 /* === POKE BUTTONS === */
@@ -174,5 +200,9 @@ p.alert.info {
 
     main {
         overflow: visible;
+    }
+
+
+    .post-text-padding {
     }
 }

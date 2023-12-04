@@ -3,7 +3,10 @@ mixin post(author, content, date)
         img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="32" height="32")
         h4= author
             span.post-date  • #{date}
-        p= content
+        .content
+            - const paragraphs = content.split(/\r?\n/);
+            each para in paragraphs
+                p= para
 
 doctype html
 html
@@ -31,9 +34,10 @@ html
                     li
                         a(href="/logout") Log Out
             main.grid-item#content
-                if page_alerts
-                    each alert in page_alerts
-                        p.alert(class=alert.severity)
-                            span.alert #{alert.severity}:
-                            | #{alert.message}
-                block content
+                div.content
+                    if page_alerts
+                        each alert in page_alerts
+                            p.alert(class=alert.severity)
+                                span.alert #{alert.severity}:
+                                | #{alert.message}
+                    block content
