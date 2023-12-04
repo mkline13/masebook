@@ -36,6 +36,6 @@ block content
     if space.can_view_posts
         if posts.length > 0
             each p in posts
-                +post(p.author_name, p.contents, p.creation_date)
+                +post(p)
         else
             p no posts to show...
