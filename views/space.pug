@@ -35,7 +35,7 @@ block content
             .post-text-padding
                 textarea.post-text(name='post', wrap='hard', oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
             input(type='submit' value='post') 
-            input(type='button', onclick="togglePostEditor()", value='cancel')
+            input(type='reset', onclick="togglePostEditor()", value='cancel')
 
         script.
             const postEditor = document.getElementById('new_post_form');
