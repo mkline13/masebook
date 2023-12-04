@@ -17,8 +17,8 @@ mixin space(s)
 
 block content
     h1 Server Directory
-    button.link-style#toggle-users(onclick="toggle(this)", data-target="users") hide users
-    button.link-style#toggle-spaces(onclick="toggle(this)", data-target="spaces") hide spaces
+    button.link-style(onclick="toggle(this)", data-target="users") hide users
+    button.link-style(onclick="toggle(this)", data-target="spaces") hide spaces
     section#users
         h2 Users
         if users
