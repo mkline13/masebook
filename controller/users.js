@@ -7,6 +7,9 @@ export default router;
 const saltRounds = 10;
 
 router.route('/')
+    .get(async (req, res) => {
+        res.redirect('/directory');
+    })
     .post(async (req, res) => {
         // Creates a new user
 

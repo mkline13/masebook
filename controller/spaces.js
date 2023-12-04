@@ -6,39 +6,7 @@ export default router;
 
 router.route('/')
     .get(async (req, res) => {
-        // show a list of spaces associated with the user
-        const sql = "SELECT id, role, name FROM get_member_spaces($1);";
-        const query = await req.db.query(sql, [req.session.user.id]);
-        
-        // sort user into appropriate list based on the user's role
-        const data = {
-            spaces: {
-                owner: [],
-                administrator: [],
-                moderator: [],
-                member: [],
-                follower: []
-            }
-        };
-
-        for (let u of query.rows) {
-            switch (u.role) {
-                case 'owner':
-                    data.spaces.owner.push(u);
-                    break;
-                case 'administrator':
-                    data.spaces.administrator.push(u);
-                    break;
-                case 'moderator':
-                    data.spaces.moderator.push(u);
-                    break;
-                case 'member':
-                    data.spaces.member.push(u);
-                    break;
-            }
-        }
-
-        res.render('user_spaces', data);
+        res.redirect('/directory');
     })
     .post(async (req, res) => {
         // create a new space
