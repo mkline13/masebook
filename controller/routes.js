@@ -3,6 +3,7 @@ import dashboard from './dashboard.js';
 import {login_controller, logout_controller} from './auth.js';
 import space_router from './spaces.js';
 import users_router from './users.js';
+import directory_router from './directory.js';
 
 // MIDDLEWARE
 function checkAuth(req, res, next) {
@@ -53,6 +54,7 @@ export default function routes(app) {
     // ROUTERS
     app.use('/spaces', checkAuth, user_info_to_locals, space_router);
     app.use('/users', checkAuth, user_info_to_locals, users_router);
+    app.use('/directory', checkAuth, user_info_to_locals, directory_router);
 
     // ROUTES
     app.get("/", checkAuth, user_info_to_locals, dashboard);

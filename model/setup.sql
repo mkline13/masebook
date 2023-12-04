@@ -135,12 +135,12 @@ FROM spaces s
 LEFT JOIN memberships m ON m.space_id = s.id AND m.user_role = 'owner';
 
 /* fn for creating a user and assigning them the owner role in a single transaction */
-CREATE OR REPLACE FUNCTION create_space(owner_id INT, space_name title_t, space_desc description_t)
+CREATE OR REPLACE FUNCTION create_space(owner_id INT, space_name title_t, space_desc description_t, visible_ BOOLEAN, show_in_dir_ BOOLEAN)
 RETURNS INT AS $$
 DECLARE new_space_id INT;
 BEGIN
     BEGIN
-        INSERT INTO spaces(name, description) VALUES (space_name, space_desc)
+        INSERT INTO spaces(name, description, visible, show_in_dir) VALUES (space_name, space_desc, visible_, show_in_dir_)
         RETURNING id INTO new_space_id;
 
         INSERT INTO memberships(space_id, user_id, user_role) VALUES (new_space_id, owner_id, 'owner');
@@ -209,5 +209,21 @@ BEGIN
     FROM spaces s
     LEFT JOIN memberships m ON m.space_id=s.id AND m.user_id=user_id_
     WHERE s.id=space_id_;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION list_server_spaces(user_id_ INT)
+RETURNS TABLE(
+    id          INT,
+    name        title_t,
+    user_role   role_t
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT s.id, s.name, m.user_role FROM spaces s
+    LEFT JOIN memberships m ON m.space_id = s.id AND m.user_id = user_id_
+    WHERE (m.user_role IS NOT NULL OR s.visible AND s.show_in_dir)
+    ORDER BY m.user_role DESC NULLS LAST, s.name ASC;
 END;
 $$ LANGUAGE plpgsql;

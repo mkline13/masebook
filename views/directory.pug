@@ -1,0 +1,38 @@
+extends masebook.pug
+
+block title
+    title Masebook | Directory
+
+mixin user(u)
+    li
+        a(href="/users/" + u.id)= u.display_name
+        if u.account_type === "administrator"
+            span.role [server administrator]
+
+mixin space(s)
+    li
+        a(href="/spaces/" + s.id)= s.name
+        if s.user_role !== null
+            span.role [#{s.user_role}]
+
+block content
+    h1 Server Directory
+    section.hidden#users
+        button.link-style(onclick="toggleUsersSpaces()") spaces
+        h2 Users
+        ul
+            for u in users
+                +user(u)
+    section#spaces
+        button.link-style(onclick="toggleUsersSpaces()") users
+        h2 Spaces
+        ul
+            for s in spaces
+                +space(s)
+    script.
+        const users = document.getElementById('users');
+        const spaces = document.getElementById('spaces');
+        function toggleUsersSpaces() {
+            users.classList.toggle('hidden');
+            spaces.classList.toggle('hidden');
+        }

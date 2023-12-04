@@ -7,12 +7,6 @@ export default router;
 const saltRounds = 10;
 
 router.route('/')
-    .get(async (req, res) => {
-        // Displays a list of all users on the server
-        const sql = "SELECT id, display_name, account_type FROM users WHERE account_status='active' AND show_in_dir=TRUE ORDER BY account_type DESC, display_name;";
-        const query = await req.db.query(sql);
-        res.render('user_directory', {users: query.rows});
-    })
     .post(async (req, res) => {
         // Creates a new user
 
