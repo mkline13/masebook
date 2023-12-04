@@ -66,8 +66,8 @@ router.route('/:space_id')
 
         // fetch member list 
         if (data.space.can_view_member_list) {
-            const sql = "SELECT m.user_id AS id, m.user_role AS role, u.display_name AS name FROM memberships m JOIN users u ON m.user_id=u.id WHERE m.user_id=$1 AND m.space_id=$2 ORDER BY m.user_role DESC, u.display_name ASC;";
-            const query = await req.db.query(sql, [user_id, space_id]);
+            const sql = "SELECT m.user_id AS id, m.user_role AS role, u.display_name AS name FROM memberships m JOIN users u ON m.user_id=u.id WHERE m.space_id=$1 ORDER BY m.user_role DESC, u.display_name ASC;";
+            const query = await req.db.query(sql, [space_id]);
             data.people = query.rows;
         }
         

@@ -49,10 +49,11 @@ CREATE TABLE spaces (
  *      Defines a user's credential level within a particular space.
  */
 CREATE TABLE memberships (
-    user_id         INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
-    space_id        INT                 NOT NULL REFERENCES spaces ON DELETE CASCADE,
-    user_role       role_t              NOT NULL DEFAULT 'member',  /* the role of the user within a space */
-    CONSTRAINT pkey PRIMARY KEY (user_id, space_id)
+    user_id             INT             NOT NULL REFERENCES users ON DELETE CASCADE,
+    space_id            INT             NOT NULL REFERENCES spaces ON DELETE CASCADE,
+    user_role           role_t          NOT NULL DEFAULT 'member',  /* the role of the user within a space */
+    show_in_profile     BOOLEAN         NOT NULL DEFAULT false,  -- TODO: implement this in front-end
+    CONSTRAINT pkey     PRIMARY KEY (user_id, space_id)
 );
 
 /*
