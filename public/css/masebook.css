@@ -73,6 +73,7 @@ button.link-style {
 }
 
 textarea {
+    box-sizing: border-box;
     resize: none;
 }
 
@@ -85,6 +86,9 @@ textarea.post-text {
     padding-bottom: 1em;
 }
 
+#new_post_form {
+    margin-bottom: 1em;
+}
 
 /* === POSTS === */
 article.post {
@@ -123,10 +127,6 @@ article.post > h4 > .post-date {
 span.role {
     font-size: 80%;
     padding-left: 1.0em;
-}
-
-#new_post_form {
-    margin-bottom: 1em;
 }
 
 /* === POKE BUTTONS === */
