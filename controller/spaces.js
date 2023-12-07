@@ -10,11 +10,17 @@ router.route('/')
     })
     .post(async (req, res) => {
         // create a new space
-        const sql = "SELECT create_space($1, $2, $3);";
-        const values = [req.session.user.id, req.body.name, req.body.description];
+        // TODO: validate request before creating space on DB
+        const sql = "INSERT INTO spaces(creator_id, name, description, visible, show_in_dir) VALUES ($1, $2, $3, $4, $5);";
+        const values = [req.session.user.id, req.body.name, req.body.description, req.body.visible, req.body.show_in_dir];
         const query = await req.db.query(sql, values);
-        res.json({new_space: query.rows});
+        res.redirect('/directory');
     });
+
+router.route('/new')
+    .get(async (req, res) => {
+        res.render('space_editor');
+    })
 
 router.route('/:space_id')
     .get(async (req, res) => {

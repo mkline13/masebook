@@ -26,6 +26,7 @@ CREATE TYPE role_t AS ENUM ('member', 'moderator', 'administrator', 'owner');
 CREATE TABLE spaces (
     id                  SERIAL              PRIMARY KEY,
     creation_date       TIMESTAMP           NOT NULL DEFAULT now(),
+    creator_id          INTEGER             NOT NULL REFERENCES users,
     name                title_t             NOT NULL,
     description         description_t       DEFAULT '',
 
@@ -55,6 +56,19 @@ CREATE TABLE memberships (
     show_in_profile     BOOLEAN         NOT NULL DEFAULT false,  -- TODO: implement this in front-end
     CONSTRAINT pkey     PRIMARY KEY (user_id, space_id)
 );
+
+CREATE OR REPLACE FUNCTION assign_owner() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO memberships(space_id, user_id, user_role) VALUES
+		(NEW.id, NEW.creator_id, 'owner');
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS assign_owner ON spaces;
+
+CREATE TRIGGER assign_owner AFTER INSERT ON spaces
+	FOR EACH ROW EXECUTE FUNCTION assign_owner();
 
 /*
  *  POSTS:
@@ -133,24 +147,6 @@ SELECT s.id, m.user_id AS owner_id, user_to_name(m.user_id) AS owner_name, s.nam
     (SELECT COUNT(*) FROM memberships WHERE space_id=s.id) AS member_count
 FROM spaces s
 LEFT JOIN memberships m ON m.space_id = s.id AND m.user_role = 'owner';
-
-/* fn for creating a user and assigning them the owner role in a single transaction */
-CREATE OR REPLACE FUNCTION create_space(owner_id INT, space_name title_t, space_desc description_t, visible_ BOOLEAN, show_in_dir_ BOOLEAN)
-RETURNS INT AS $$
-DECLARE new_space_id INT;
-BEGIN
-    BEGIN
-        INSERT INTO spaces(name, description, visible, show_in_dir) VALUES (space_name, space_desc, visible_, show_in_dir_)
-        RETURNING id INTO new_space_id;
-
-        INSERT INTO memberships(space_id, user_id, user_role) VALUES (new_space_id, owner_id, 'owner');
-    EXCEPTION WHEN OTHERS THEN
-        ROLLBACK;
-        RAISE;
-    END;
-    RETURN new_space_id;
-END;
-$$ LANGUAGE plpgsql;
 
 /* get user's member spaces */
 CREATE OR REPLACE FUNCTION get_member_spaces(user_id_ INT)
