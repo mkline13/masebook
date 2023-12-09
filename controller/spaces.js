@@ -1,21 +1,62 @@
 import express from 'express';
+import { body, checkExact, matchedData, validationResult } from 'express-validator';
 
 const router = express.Router();
 export default router;
 
+/* HELPER FUNCTIONS */
+function buildParamList(end) {
+    const list = [];
+    for (let i=1; i<=end; i++) {
+        list.push('$' + i);
+    }
+    return list;
+}
 
+function buildInsertQuery(table, obj) {
+    // NOTE: this function is not secure. Use data validation before building the query.
+    const keys = Object.keys(obj);
+    const params = buildParamList(keys.length);
+    return {
+        text: `INSERT INTO ${table} (${keys.join(',')}) VALUES (${params.join(',')});`,
+        values: Object.values(obj)
+    };
+}
+
+/* ROUTES */
 router.route('/')
     .get(async (req, res) => {
         res.redirect('/directory');
     })
-    .post(async (req, res) => {
-        // create a new space
-        // TODO: validate request before creating space on DB
-        const sql = "INSERT INTO spaces(creator_id, name, description, visible, show_in_dir) VALUES ($1, $2, $3, $4, $5);";
-        const values = [req.session.user.id, req.body.name, req.body.description, req.body.visible, req.body.show_in_dir];
-        const query = await req.db.query(sql, values);
-        res.redirect('/directory');
-    });
+    .post(
+        body('name').trim().notEmpty().escape(),
+        body('description').optional().trim().escape().default(''),
+        body('visible').optional().isBoolean(),
+        body('show_in_dir').optional().isBoolean(),
+        body('view_member_list').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
+        body('view_posts').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
+        body('create_posts').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
+        body('delete_posts').optional().isIn(['moderator', 'administrator', 'owner']),
+        body('view_comments').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
+        body('create_comments').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
+        body('delete_comments').optional().isIn(['moderator', 'administrator', 'owner']),
+        async (req, res) => {
+            // creates a new space
+            // TODO: handle validation errors
+            console.log('body', req.body);
+            const validationErrors = validationResult(req);
+
+            const data = matchedData(req);
+            data.creator_id = req.session.user.id;
+            console.log('data:', data);
+
+            const q = buildInsertQuery('spaces', data);
+            console.log('query:', q);
+
+            const result = await req.db.query(q);
+            res.redirect('/directory');
+        }
+    );
 
 router.route('/new')
     .get(async (req, res) => {
@@ -31,20 +72,20 @@ router.route('/:space_id')
         const sql = "SELECT * FROM get_space_info_with_user_context($1, $2);";
         const query = await req.db.query(sql, [user_id, space_id]);
         const data = {space: query.rows?.[0]};
-        
+
         // if space doesn't exist OR is not visible to this particular user, send error
         if (data.space === undefined || !data.space.is_visible) {
             res.status(404).send("Not found");
             return;
         }
 
-        // fetch member list 
+        // fetch member list
         if (data.space.can_view_member_list) {
             const sql = "SELECT m.user_id AS id, m.user_role AS role, u.display_name AS name FROM memberships m JOIN users u ON m.user_id=u.id WHERE m.space_id=$1 ORDER BY m.user_role DESC, u.display_name ASC;";
             const query = await req.db.query(sql, [space_id]);
             data.people = query.rows;
         }
-        
+
         // fetch posts
         if (data.space.can_view_posts) {
             const sql = "SELECT p.*, u.display_name AS author_name FROM posts p JOIN users u ON p.author_id = u.id WHERE space_id=$1 ORDER BY p.id DESC;";

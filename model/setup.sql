@@ -44,6 +44,13 @@ CREATE TABLE spaces (
     delete_comments     role_t      DEFAULT 'moderator' CHECK (delete_comments > 'member'::role_t)
 );
 
+CREATE TABLE space_permissions (
+    space_id            INTEGER     NOT NULL REFERENCES spaces,
+    privilege_id        INTEGER     NOT NULL REFERENCES privileges,
+    level_required      INTEGER     NOT NULL,
+)
+
+
 
 /*
  *  MEMBERSHIPS:

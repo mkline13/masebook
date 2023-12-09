@@ -14,7 +14,7 @@ block content
     form#space-editor(action="/spaces", method='post')
         label(for='space_name') Name
         br
-        input#space_name(type='text', name='name', minlength='1', maxlength='64', size='64')
+        input#space_name(type='text', name='name', minlength='1', maxlength='64', size='64' required)
         br
         br
         label(for='space_desc') Description
@@ -23,40 +23,40 @@ block content
         br
         br
         label(for='space_visible') Visible to non-members?
-        input#space_visible(type='checkbox', name='visible')
+        input#space_visible(type='checkbox', name='visible', value='true')
         br
         br
         label(for='space_show_in_dir') Show in Server Directory?
-        input#space_show_in_dir(type='checkbox', name='show_in_dir')
+        input#space_show_in_dir(type='checkbox', name='show_in_dir', value='true')
         br
         br
         h3 Permissions
         label(for='view_member_list') Who can view member list?
-        select#view_member_list
+        select#view_member_list(name='view_member_list')
             +options('member', 'moderator', 'administrator', 'owner')
         br
         label(for='view_posts') Who can view posts?
-        select#view_posts
+        select#view_posts(name='view_posts')
             +options('member', 'moderator', 'administrator', 'owner')
         br
         label(for='create_posts') Who can create posts?
-        select#create_posts
+        select#create_posts(name='create_posts')
             +options('member', 'moderator', 'administrator', 'owner')
         br
         label(for='delete_posts') Who can delete posts?
-        select#delete_posts
+        select#delete_posts(name='delete_posts')
             +options('moderator', 'administrator', 'owner')
         br
         label(for='view_comments') Who can view comments?
-        select#view_comments
+        select#view_comments(name='view_comments')
             +options('member', 'moderator', 'administrator', 'owner')
         br
         label(for='create_comments') Who can create comments?
-        select#create_comments
+        select#create_comments(name='create_comments')
             +options('member', 'moderator', 'administrator', 'owner')
         br
         label(for='delete_comments') Who can delete comments?
-        select#delete_comments
+        select#delete_comments(name='delete_comments')
             +options('moderator', 'administrator', 'owner')
         br
         br
