@@ -9,20 +9,18 @@ html
     body
         div.padbox
             h1 Masebook
-            form#login_form(method="post" action="/login")
-                label(for="email") Email:
-                br
-                input#email(type="email" name="email")
-                br
-                br
-                label(for="password") Password:
-                br
-                input#password(type="password" name="password")
-                br
-                br
-                input(type='submit' value='go')
+            form#login-form(method="post" action="/login")
+                fieldset
+                    legend Login
+                    .form-item.block
+                        label(for="email") Email
+                        input#email(type="email" name="email")
+                    .form-item.block
+                        label(for="password") Password
+                        input#password(type="password" name="password")
+                    input.form-item(type='submit' value='go')
             script.
-                const form = document.getElementById("login_form");
+                const form = document.getElementById("login-form");
 
                 const submit = function(e) {
                     // get redirect parameter from url bar

@@ -91,29 +91,46 @@ textarea.post-text {
     padding-bottom: 1em;
 }
 
-#new_post_form {
-    margin-bottom: 1em;
-}
+/* FORM STYLING */
+
+
 
 fieldset {
+    width: fit-content;
+    margin: 0;
+}
+
+fieldset > * {
+    margin: 0;
+}
+
+fieldset label {
+    white-space: nowrap;
+}
+
+#space-editor > fieldset {
     display: grid;
     grid-template-columns: min-content min-content;
-    width: fit-content;
-    grid-gap: 0.5rem;
-    margin: 0;
-  }
-  fieldset label {
-    white-space: nowrap;
-  }
-  #space-editor > * {
-    margin-bottom: 1rem;
-  }
-  .form-element > label + input[type='text'] {
+    column-gap: 1rem;
+    row-gap: 0.5rem;
+}
+
+form > * + * {
+    margin-top: 1rem;
+}
+
+#login-form fieldset > .form-item + .form-item {
+    margin-top: 1rem;
+}
+
+.form-item.block > * {
     display: block;
-  }
-  .form-element > input[type="checkbox"] {
-    margin-right: 0.5rem;
-  }
+    margin: 0;
+}
+
+input[type=checkbox]:first-child + * {
+    margin-left: 0.5rem;
+}
 
 /* === POSTS === */
 article.post {
