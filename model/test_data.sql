@@ -15,6 +15,9 @@ INSERT INTO spaces(creator_id, name, description, visible, show_in_dir) VALUES
     (email_to_user('scooby@gmail.com'), 'Just a normal space', 'Nothing to see here :)', false, false),
     (email_to_user('scooby@gmail.com'), 'A pathetic waste of a space', 'Ewwwww', false, true);
 
+INSERT INTO space_permissions VALUES
+    (1, 'view_posts', 'owner');
+
 INSERT INTO memberships(user_id, space_id) VALUES
     (email_to_user('mkline13@gmail.com'), 6),
     (email_to_user('mason@mason.mason'), 1),

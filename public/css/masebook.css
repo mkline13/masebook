@@ -95,6 +95,26 @@ textarea.post-text {
     margin-bottom: 1em;
 }
 
+fieldset {
+    display: grid;
+    grid-template-columns: min-content min-content;
+    width: fit-content;
+    grid-gap: 0.5rem;
+    margin: 0;
+  }
+  fieldset label {
+    white-space: nowrap;
+  }
+  #space-editor > * {
+    margin-bottom: 1rem;
+  }
+  .form-element > label + input[type='text'] {
+    display: block;
+  }
+  .form-element > input[type="checkbox"] {
+    margin-right: 0.5rem;
+  }
+
 /* === POSTS === */
 article.post {
     display: grid;

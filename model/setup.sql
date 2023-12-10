@@ -31,26 +31,30 @@ CREATE TABLE spaces (
     description         description_t       DEFAULT '',
 
     /* SETTINGS */
-    visible             BOOLEAN             DEFAULT false NOT NULL, -- can other server members see the space?
-    show_in_dir         BOOLEAN             DEFAULT false NOT NULL,  -- will the space be displayed in the server directory
-    
-    /* PERMISSIONS */
-    view_member_list    role_t      DEFAULT 'member',
-    view_posts          role_t      DEFAULT 'member',
-    create_posts        role_t      DEFAULT 'member',
-    delete_posts        role_t      DEFAULT 'moderator' CHECK (delete_posts > 'member'::role_t),
-    view_comments       role_t      DEFAULT 'member',
-    create_comments     role_t      DEFAULT 'member',
-    delete_comments     role_t      DEFAULT 'moderator' CHECK (delete_comments > 'member'::role_t)
+    visible             BOOLEAN             DEFAULT false NOT NULL,     -- can other server members see the space?
+    show_in_dir         BOOLEAN             DEFAULT false NOT NULL      -- will the space be displayed in the server directory
 );
 
-CREATE TABLE space_permissions (
-    space_id            INTEGER     NOT NULL REFERENCES spaces,
-    privilege_id        INTEGER     NOT NULL REFERENCES privileges,
-    level_required      INTEGER     NOT NULL,
-)
+CREATE TABLE space_actions ( -- this table should not be modified at runtime
+    action          title_t     PRIMARY KEY,
+    min_role        role_t      NOT NULL        -- the minimum role required by the server for this privilege (also the default role)
+);
 
+INSERT INTO space_actions VALUES
+    ('view_member_list', 'member'),
+    ('view_posts', 'member'),
+    ('create_posts', 'member'),
+    ('delete_posts', 'moderator'),
+    ('view_comments', 'member'),
+    ('create_comments', 'member'),
+    ('delete_comments', 'moderator');
 
+CREATE TABLE space_permissions(
+    space_id            INT         NOT NULL REFERENCES spaces ON DELETE CASCADE,
+    action              title_t     NOT NULL REFERENCES space_actions ON DELETE CASCADE,
+    role_required       role_t      NOT NULL,
+    CONSTRAINT sp_pkey PRIMARY KEY (space_id, action)
+);
 
 /*
  *  MEMBERSHIPS:
@@ -172,46 +176,6 @@ BEGIN
     LEFT JOIN memberships m ON m.space_id = s.id
     WHERE m.user_id = user_id_
     ORDER BY m.user_role, s.name;
-END;
-$$ LANGUAGE plpgsql;
-
-/* load space info and calculate user's permissions */
-CREATE OR REPLACE FUNCTION get_space_info_with_user_context(user_id_ INT, space_id_ INT)
-RETURNS TABLE(
-    id                      INT,
-    creation_date           TIMESTAMP,
-    name                    title_t,
-    description             description_t,
-
-    /* SETTINGS */
-    is_visible              BOOLEAN,
-    is_shown_in_dir         BOOLEAN,
-
-    /* PERMISSIONS */
-    can_view_member_list    BOOLEAN,
-    can_view_posts          BOOLEAN,
-    can_create_posts        BOOLEAN,
-    can_delete_posts        BOOLEAN,
-    can_view_comments       BOOLEAN,
-    can_create_comments     BOOLEAN,
-    can_delete_comments     BOOLEAN
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT
-        s.id, s.creation_date, s.name, s.description,
-        (m.user_role IS NOT NULL OR s.visible)              AS is_visible,
-        (m.user_role IS NOT NULL OR s.show_in_dir)          AS is_shown_in_dir,
-        coalesce(m.user_role >= s.view_member_list, false)  AS can_view_member_list,
-        coalesce(m.user_role >= s.view_posts, false)        AS can_view_posts,
-        coalesce(m.user_role >= s.create_posts, false)      AS can_create_posts,
-        coalesce(m.user_role >= s.delete_posts, false)      AS can_delete_posts,
-        coalesce(m.user_role >= s.view_comments, false)     AS can_view_comments,
-        coalesce(m.user_role >= s.create_comments, false)   AS can_create_comments,
-        coalesce(m.user_role >= s.delete_comments, false)   AS can_delete_comments
-    FROM spaces s
-    LEFT JOIN memberships m ON m.space_id=s.id AND m.user_id=user_id_
-    WHERE s.id=space_id_;
 END;
 $$ LANGUAGE plpgsql;
 

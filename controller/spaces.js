@@ -23,6 +23,42 @@ function buildInsertQuery(table, obj) {
     };
 }
 
+async function getSpaceInfo(req, res, next) {
+    // get space info
+    const query = {
+        text: "SELECT * FROM spaces WHERE id=$1;",
+        values: [req.params.space_id]  // TODO: sanitize
+    }
+    const result = await req.db.query(query);
+    const space = result.rows[0];
+
+    space.permissions = {};
+    space.min_permissions = {};
+    space.user_permissions = {};
+
+    // get permissions
+    {
+        const query = {
+            text:  `SELECT
+                        sa.action, sa.min_role, coalesce(sp.role_required, sa.min_role) as role_required
+                    FROM
+                        space_actions sa
+                        LEFT JOIN space_permissions sp ON sa.action = sp.action AND sp.space_id = $1;`,
+            values: [space_id]
+        }
+        const result = await req.db.query(query);
+        for (const row of result.rows) {
+            space.permissions[row.action] = row.role_required;
+            space.min_permissions[row.action] = row.min_role;
+        }
+    }
+
+    // TODO: calculate user permissions
+
+    res.locals.space = space;
+    next();
+}
+
 /* ROUTES */
 router.route('/')
     .get(async (req, res) => {
