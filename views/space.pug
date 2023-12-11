@@ -7,7 +7,7 @@ block content
     h1 #{space.name}
     p #{space.description} &nbsp;
 
-    if space.can_view_member_list
+    if user.space.permissions.view_member_list
         button.link-style(onclick="toggleInfo()") info
         #info.hidden
             h3 Members [#{people.length}]
@@ -23,10 +23,10 @@ block content
                 info.classList.toggle('hidden');
             }
     
-    if space.can_view_posts || space.can_create_posts
+    if user.space.permissions.view_posts || user.space.permissions.create_posts
         h2 Posts
     
-    if space.can_create_posts
+    if user.space.permissions.create_posts
         .spacer
             button.link-style#post_editor_button(onclick="togglePostEditor()") create post
             form#new_post_form.hidden(method='post')
@@ -43,9 +43,8 @@ block content
                 postEditor.classList.toggle('hidden');
                 postEditorButton.classList.toggle('hidden');
             }
-
     
-    if space.can_view_posts
+    if user.space.permissions.view_posts
         if posts.length > 0
             each p in posts
                 +post(p)

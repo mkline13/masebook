@@ -24,38 +24,98 @@ function buildInsertQuery(table, obj) {
 }
 
 async function getSpaceInfo(req, res, next) {
+    const user = res.locals.user;
+    user.space = {};
+    const space_id = req.params.space_id; //TODO: sanitize
+
     // get space info
     const query = {
-        text: "SELECT * FROM spaces WHERE id=$1;",
-        values: [req.params.space_id]  // TODO: sanitize
+        text:  `SELECT
+                    s.*,
+                    m.user_role,
+                    m.show_in_profile AS in_user_profile
+                FROM
+                    spaces s
+                    FULL OUTER JOIN memberships m ON m.space_id = s.id AND m.user_id=$2
+                    WHERE s.id=$1;`,
+        values: [space_id, user.id]
     }
     const result = await req.db.query(query);
-    const space = result.rows[0];
 
-    space.permissions = {};
-    space.min_permissions = {};
-    space.user_permissions = {};
+    const space = {};
+    // Split result into proper container
+    for (const [k, v] of Object.entries(result.rows[0])) {
+        switch (k) {
+            case 'in_user_profile':
+                user.space.in_profile = v;
+                break;
+            case 'user_role':
+                user.space.role = v;
+                break;
+            default:
+                space[k] = v;
+        }
+    }
+
+    user.space.visible = space.visible || user.space.role !== null;
+    user.space.show_in_dir = (space.visible && space.show_in_dir) || user.space.role !== null;
+
+    res.locals.space = space;
+    next();
+}
+
+async function getSpacePermissions(req, res, next) {
+    // Expects that getSpaceInfo has been run already
+    const user = res.locals.user;
+    if (!user.space.visible) {
+        next();
+        return;
+    }
+
+    const permissions = {};
+    const default_permissions = {};
+    const user_permissions = {};
 
     // get permissions
     {
         const query = {
-            text:  `SELECT
-                        sa.action, sa.min_role, coalesce(sp.role_required, sa.min_role) as role_required
+            name: 'fetch-space-permissions',
+            text:  `WITH actions AS (
+                        SELECT
+                            sa.action,
+                            sa.default_role_required,
+                            coalesce(sp.role_required, sa.default_role_required) as role_required
+                        FROM
+                            space_actions sa
+                            LEFT JOIN space_permissions sp ON sp.action=sa.action AND sp.space_id=$1
+                    )
+                    SELECT
+                        a.action,
+                        a.default_role_required,
+                        a.role_required,
+                        m.user_role >= a.role_required as can_user_do
                     FROM
-                        space_actions sa
-                        LEFT JOIN space_permissions sp ON sa.action = sp.action AND sp.space_id = $1;`,
-            values: [space_id]
+                        actions a
+                        LEFT JOIN memberships m ON m.space_id=$1 AND m.user_id=$2`,
+            values: [res.locals.space.id, req.session.user.id]
         }
         const result = await req.db.query(query);
+
         for (const row of result.rows) {
-            space.permissions[row.action] = row.role_required;
-            space.min_permissions[row.action] = row.min_role;
+            permissions[row.action] = row.role_required;
+        }
+        for (const row of result.rows) {
+            default_permissions[row.action] = row.default_role_required;
+        }
+        for (const row of result.rows) {
+            user_permissions[row.action] = row.can_user_do;
         }
     }
 
-    // TODO: calculate user permissions
+    res.locals.space.permissions = permissions;
+    res.locals.space.default_permissions = default_permissions;
+    res.locals.user.space.permissions = user_permissions;
 
-    res.locals.space = space;
     next();
 }
 
@@ -67,8 +127,8 @@ router.route('/')
     .post(
         body('name').trim().notEmpty().escape(),
         body('description').optional().trim().escape().default(''),
-        body('visible').optional().isBoolean(),
-        body('show_in_dir').optional().isBoolean(),
+        body('visible').optional().isBoolean().default('false'),
+        body('show_in_dir').optional().isBoolean().default('false'),
         body('view_member_list').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
         body('view_posts').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
         body('create_posts').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
@@ -100,40 +160,35 @@ router.route('/new')
     })
 
 router.route('/:space_id')
-    .get(async (req, res) => {
-        const user_id = req.session.user.id;
-        const space_id = req.params.space_id;
-
-        // fetch space info to determine if space exists
-        const sql = "SELECT * FROM get_space_info_with_user_context($1, $2);";
-        const query = await req.db.query(sql, [user_id, space_id]);
-        const data = {space: query.rows?.[0]};
+    .get(getSpaceInfo, getSpacePermissions, async (req, res) => {
+        const space = res.locals.space;
+        const user = res.locals.user;
 
         // if space doesn't exist OR is not visible to this particular user, send error
-        if (data.space === undefined || !data.space.is_visible) {
+        if (space === undefined || !user.space.visible) {
             res.status(404).send("Not found");
             return;
         }
 
         // fetch member list
-        if (data.space.can_view_member_list) {
+        if (user.space.permissions.view_member_list) {
             const sql = "SELECT m.user_id AS id, m.user_role AS role, u.display_name AS name FROM memberships m JOIN users u ON m.user_id=u.id WHERE m.space_id=$1 ORDER BY m.user_role DESC, u.display_name ASC;";
-            const query = await req.db.query(sql, [space_id]);
-            data.people = query.rows;
+            const result = await req.db.query(sql, [space.id]);
+            res.locals.people = result.rows;
         }
 
         // fetch posts
-        if (data.space.can_view_posts) {
+        if (user.space.permissions.view_posts) {
             const sql = "SELECT p.*, u.display_name AS author_name FROM posts p JOIN users u ON p.author_id = u.id WHERE space_id=$1 ORDER BY p.id DESC;";
-            const query = await req.db.query(sql, [space_id]);
-            data.posts = query.rows;
+            const result = await req.db.query(sql, [space.id]);
+            res.locals.posts = result.rows;
         }
 
-        res.render('space', data);
+        res.render('space');
     })
-    .post(async (req, res) => {
-        const user_id = req.session.user.id;
-        const space_id = req.params.space_id;
+    .post(getSpaceInfo, getSpacePermissions, async (req, res) => {
+        const user = res.locals.user;
+        const space = res.locals.space;
         const post_text = req.body.post; // TODO: properly prep post text for storage
 
         if (!post_text) {
@@ -142,20 +197,20 @@ router.route('/:space_id')
             return;
         }
 
+        if (space === undefined || !user.space.visible) {
+            res.status(400).send("No such space");
+            return;
+        }
+
         // get permissions
-        let sql = "SELECT id, can_create_posts FROM get_space_info_with_user_context($1, $2);";
-        let query = await req.db.query(sql, [user_id, space_id]);
-        const can_create_post = query.rows[0].can_create_posts ?? false;
-
-        // TODO: add case for space doesn't exist
-
+        const can_create_post = user.space.permissions.create_posts;
         if (!can_create_post) {
             res.status(403).send("User does not have post creation privileges in this space");
             return;
         }
 
-        sql = "INSERT INTO posts(space_id, author_id, contents) VALUES ($1, $2, $3) RETURNING *;";
-        query = await req.db.query(sql, [space_id, user_id, post_text]);
+        const sql = "INSERT INTO posts(space_id, author_id, contents) VALUES ($1, $2, $3) RETURNING *;";
+        const result = await req.db.query(sql, [space.id, user.id, post_text]);
         //TODO: error handling
 
         res.redirect('back');

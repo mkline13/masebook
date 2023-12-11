@@ -1,4 +1,3 @@
-
 CREATE DOMAIN title_t AS VARCHAR(64);
 CREATE DOMAIN description_t AS VARCHAR(256);
 
@@ -36,8 +35,8 @@ CREATE TABLE spaces (
 );
 
 CREATE TABLE space_actions ( -- this table should not be modified at runtime
-    action          title_t     PRIMARY KEY,
-    min_role        role_t      NOT NULL        -- the minimum role required by the server for this privilege (also the default role)
+    action                  title_t     PRIMARY KEY,
+    default_role_required   role_t      NOT NULL        -- the minimum role required by the server for this privilege (also the default role)
 );
 
 INSERT INTO space_actions VALUES
@@ -75,8 +74,6 @@ BEGIN
 	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS assign_owner ON spaces;
 
 CREATE TRIGGER assign_owner AFTER INSERT ON spaces
 	FOR EACH ROW EXECUTE FUNCTION assign_owner();
