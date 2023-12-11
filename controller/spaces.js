@@ -18,7 +18,7 @@ function buildInsertQuery(table, obj) {
     const keys = Object.keys(obj);
     const params = buildParamList(keys.length);
     return {
-        text: `INSERT INTO ${table} (${keys.join(',')}) VALUES (${params.join(',')});`,
+        text: `INSERT INTO ${table} (${keys.join(',')}) VALUES (${params.join(',')}) RETURNING *;`,
         values: Object.values(obj)
     };
 }
@@ -42,25 +42,28 @@ async function getSpaceInfo(req, res, next) {
     }
     const result = await req.db.query(query);
 
-    const space = {};
     // Split result into proper container
-    for (const [k, v] of Object.entries(result.rows[0])) {
-        switch (k) {
-            case 'in_user_profile':
-                user.space.in_profile = v;
-                break;
-            case 'user_role':
-                user.space.role = v;
-                break;
-            default:
-                space[k] = v;
+    if (result.rows[0]) {
+        const space = {};
+        for (const [k, v] of Object.entries(result.rows[0])) {
+            switch (k) {
+                case 'in_user_profile':
+                    user.space.in_profile = v;
+                    break;
+                case 'user_role':
+                    user.space.role = v;
+                    break;
+                default:
+                    space[k] = v;
+            }
         }
+    
+        user.space.visible = space.visible || user.space.role !== null;
+        user.space.show_in_dir = (space.visible && space.show_in_dir) || user.space.role !== null;
+    
+        res.locals.space = space;
     }
 
-    user.space.visible = space.visible || user.space.role !== null;
-    user.space.show_in_dir = (space.visible && space.show_in_dir) || user.space.role !== null;
-
-    res.locals.space = space;
     next();
 }
 
@@ -119,43 +122,61 @@ async function getSpacePermissions(req, res, next) {
     next();
 }
 
+const roles = ['member', 'moderator', 'administrator', 'owner'];
+
+// TODO: instead of lazy loading like this, load permissions at startup
+let default_permissions_cache;
+async function get_default_permissions(db) {
+    if (default_permissions_cache === undefined) {
+        const sql = "SELECT * FROM space_actions;"
+        const result = await db.query(sql);
+        default_permissions_cache = result.rows;
+    }
+    return default_permissions_cache;
+}
+
+
 /* ROUTES */
 router.route('/')
     .get(async (req, res) => {
         res.redirect('/directory');
     })
     .post(
-        body('name').trim().notEmpty().escape(),
-        body('description').optional().trim().escape().default(''),
-        body('visible').optional().isBoolean().default('false'),
-        body('show_in_dir').optional().isBoolean().default('false'),
-        body('view_member_list').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
-        body('view_posts').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
-        body('create_posts').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
-        body('delete_posts').optional().isIn(['moderator', 'administrator', 'owner']),
-        body('view_comments').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
-        body('create_comments').optional().isIn(['member', 'moderator', 'administrator', 'owner']),
-        body('delete_comments').optional().isIn(['moderator', 'administrator', 'owner']),
+        body('settings').isObject(),
+        body('permissions').isArray(),
+        body('settings.name').trim().notEmpty().escape(),
+        body('settings.description').optional().trim().escape().default(''),
+        body('settings.visible').optional().isBoolean().default('false'),
+        body('settings.show_in_dir').optional().isBoolean().default('false'),
+        body('permissions.*').isArray(),
+        body('permissions.*.*').isString(),
         async (req, res) => {
             // creates a new space
-            // TODO: handle validation errors
-            console.log('body', req.body);
-            const validationErrors = validationResult(req);
-
+            const validationErrors = validationResult(req); // TODO: handle validation errors
             const data = matchedData(req);
-            data.creator_id = req.session.user.id;
-            console.log('data:', data);
+            data.settings.creator_id = req.session.user.id;
 
-            const q = buildInsertQuery('spaces', data);
-            console.log('query:', q);
+            const settings_query = buildInsertQuery('spaces', data.settings);
+            const permissions_query = "INSERT INTO space_permissions(space_id, action, role_required) VALUES ($1, $2, $3) RETURNING *;"
+            // create new space
+            await req.db.execute(async (db) => {
+                const new_space_result = await db.query(settings_query);
+                const new_space_id = new_space_result.rows[0].id;
+                
+                for (const [k,v] of data.permissions) {
+                    const result = await db.query(permissions_query, [new_space_id, k, v]);
+                }
+            });
 
-            const result = await req.db.query(q);
             res.redirect('/directory');
         }
     );
 
+
 router.route('/new')
     .get(async (req, res) => {
+        res.locals.space ||= {};
+        res.locals.space.default_permissions = await get_default_permissions(req.db);
         res.render('space_editor');
     })
 

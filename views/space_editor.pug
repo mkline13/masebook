@@ -1,17 +1,26 @@
 extends masebook.pug
 
 block title
-    - const titleText = space ? `Edit Space | ${space.name}` : 'New Space'
+    - const titleText = space.name ? `Edit Space | ${space.name}` : 'New Space'
     title= titleText
 
+mixin options(default_item)
+    each i in ['member', 'moderator', 'administrator', 'owner']
+        if (i == default_item)
+            option(value=i selected)= i
+        else
+            option(value=i)= i
 
-mixin options(...items)
-    each i in items 
-        option(value=i)= i
+mixin permissions(defaults)
+    each i in defaults
+        - const action  = 'p_' + i.action
+        label(for=action)= i.description
+        select(id=action, name=action)
+            +options(i.default_role_required)
 
 block content
     h1= titleText
-    form#space-editor(action="/spaces", method='post')
+    form#space-editor()
         .form-item.block
             label(for='space_name') Name
             input#space_name(type='text', name='name', minlength='1', maxlength='64', required)
@@ -27,26 +36,46 @@ block content
         
         fieldset.form-item
             legend Permissions
-            label(for='view_member_list') Who can view member list?
-            select#view_member_list(name='view_member_list')
-                +options('member', 'moderator', 'administrator', 'owner')
-            label(for='view_posts') Who can view posts?
-            select#view_posts(name='view_posts')
-                +options('member', 'moderator', 'administrator', 'owner')
-            label(for='create_posts') Who can create posts?
-            select#create_posts(name='create_posts')
-                +options('member', 'moderator', 'administrator', 'owner')
-            label(for='delete_posts') Who can delete posts?
-            select#delete_posts(name='delete_posts')
-                +options('moderator', 'administrator', 'owner')
-            label(for='view_comments') Who can view comments?
-            select#view_comments(name='view_comments')
-                +options('member', 'moderator', 'administrator', 'owner')
-            label(for='create_comments') Who can create comments?
-            select#create_comments(name='create_comments')
-                +options('member', 'moderator', 'administrator', 'owner')
-            label(for='delete_comments') Who can delete comments?
-            select#delete_comments(name='delete_comments')
-                +options('moderator', 'administrator', 'owner')
+            +permissions(space.default_permissions)
         
         input.form-item(type='submit', value='submit')
+    script.
+        const form = document.getElementById('space-editor');
+        form.addEventListener('submit', async event => {
+            event.preventDefault();
+            const data = new FormData(form);
+
+            const reformatted = {
+                settings: {},
+                permissions: []
+            };
+
+            for (const [k,v] of data.entries()) {
+                if (k.startsWith('p_')) {
+                    reformatted.permissions.push([k.substring(2),v]);
+                }
+                else {
+                    reformatted.settings[k] = v;
+                }
+            }
+
+            try {
+                const fetchOptions = {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json"
+                    },
+                    body: JSON.stringify(reformatted),
+                }
+                fetch('/spaces', fetchOptions)
+                    .then(res => {
+                        if (res.redirected) {
+                            window.location.href = res.url;
+                        }
+                    });
+            }
+            catch (err) {
+                console.log(err.message);
+            }
+        });

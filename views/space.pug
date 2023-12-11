@@ -5,7 +5,9 @@ block title
 
 block content
     h1 #{space.name}
-    p #{space.description} &nbsp;
+
+    if space.description
+        p #{space.description} &nbsp;
 
     if user.space.permissions.view_member_list
         button.link-style(onclick="toggleInfo()") info

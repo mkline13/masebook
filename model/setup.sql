@@ -35,18 +35,19 @@ CREATE TABLE spaces (
 );
 
 CREATE TABLE space_actions ( -- this table should not be modified at runtime
-    action                  title_t     PRIMARY KEY,
-    default_role_required   role_t      NOT NULL        -- the minimum role required by the server for this privilege (also the default role)
+    action                  title_t         PRIMARY KEY,
+    description             description_t   NOT NULL,
+    default_role_required   role_t          NOT NULL        -- the minimum role required by the server for this privilege (also the default role)
 );
 
 INSERT INTO space_actions VALUES
-    ('view_member_list', 'member'),
-    ('view_posts', 'member'),
-    ('create_posts', 'member'),
-    ('delete_posts', 'moderator'),
-    ('view_comments', 'member'),
-    ('create_comments', 'member'),
-    ('delete_comments', 'moderator');
+    ('view_member_list', 'Who can view members of this space?', 'member'),
+    ('view_posts', 'Who can view posts in this space?', 'member'),
+    ('create_posts', 'Who can create posts in this space?', 'member'),
+    ('delete_posts', 'Who can delete posts in this space?', 'moderator'),
+    ('view_comments', 'Who can view comments on posts in this space?', 'member'),
+    ('create_comments', 'Who can create comments on posts in this space?', 'member'),
+    ('delete_comments', 'Who can delete comments on posts in this space?', 'moderator');
 
 CREATE TABLE space_permissions(
     space_id            INT         NOT NULL REFERENCES spaces ON DELETE CASCADE,
