@@ -20,10 +20,11 @@ These are the features that have been implemented thus far:
 - Authentication (session-based)
 - Role-based permissions system for determining a user's allowed actions within a space
 - Server directory of spaces and users
+- Creation of new spaces
 - Reading / creating posts in authorized spaces
 
 Unfinished MVP features:
-- Space creation / deletion / editing
+- Space deletion / editing
 - Updating / deleting posts
 - Following spaces
 - Dashboard feed
