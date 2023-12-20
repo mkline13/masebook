@@ -94,7 +94,12 @@ router.route('/')
 
 router.route('/new')
     .get(async (req, res) => {
-        res.locals.space ||= {};
+        res.locals.defaults = {
+            settings: defaultSpaceSettings,
+            permissions: defaultSpacePermissions
+        };
+        res.locals.roles = levelToRole;
+        res.locals.space = {};
         res.render('space_editor');
     })
 
