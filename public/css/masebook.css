@@ -98,6 +98,7 @@ textarea.post-text {
 fieldset {
     width: fit-content;
     margin: 0;
+    padding-top: 0.75rem;
 }
 
 fieldset > * {
@@ -116,7 +117,7 @@ fieldset label {
 }
 
 form > * + * {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
 #login-form fieldset > .form-item + .form-item {
