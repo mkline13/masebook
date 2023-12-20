@@ -1,8 +1,9 @@
 import pg from 'pg';
 
+
 export default class Database {
     constructor(dbParams) {
-        this.pool = new pg.Pool(dbParams)
+        this.pool = new pg.Pool(dbParams);
     }
 
     // call this to gracefully close the db when the program quits

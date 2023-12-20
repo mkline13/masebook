@@ -21,7 +21,7 @@ const dbParams = {
 };
 
 const db = new Database(dbParams);
-const app = createApp(db);
+const app = await createApp(db);
 const server = createServer(serverOptions, app).listen(process.env.PORT, () => {
     console.log(`Listening on port ${process.env.PORT}...`)
 });

@@ -4,19 +4,22 @@ block title
     - const titleText = space.name ? `Edit Space | ${space.name}` : 'New Space'
     title= titleText
 
-mixin options(default_item)
-    each i in ['member', 'moderator', 'administrator', 'owner']
-        if (i == default_item)
-            option(value=i selected)= i
+mixin options(default_index)
+    - for (const i=0; i<roles.length; i++ )
+        const role = roles[i];
+        if (i == default_index)
+            option(value=i selected)= role
         else
-            option(value=i)= i
+            option(value=i)= role
 
-mixin permissions(defaults)
-    each i in defaults
-        - const action  = 'p_' + i.action
-        label(for=action)= i.description
-        select(id=action, name=action)
-            +options(i.default_role_required)
+mixin permissions()
+    - permissions = spaceDefaults.permissions;
+    - for (const k in permissions)
+        - const actionName  = 'p_' + k;
+        - const actionDesc = k.replace('_', ' ');
+        label(for=actionName)= actionDesc
+        select(id=actionName, name=actionName)
+            +options(permissions[k])
 
 block content
     h1= titleText
@@ -28,15 +31,15 @@ block content
             label(for='space_desc') Description
             input#space_desc(type='text', name='description', minlength='1', maxlength='256')
         .form-item
-            input#space_visible(type='checkbox', name='visible', value='true')
+            input#space_visible(type='checkbox', name='visible', value=spaceDefaults.visible)
             label(for='space_visible') Visible to non-members
         .form-item
-            input#space_show_in_dir(type='checkbox', name='show_in_dir', value='true')
+            input#space_show_in_dir(type='checkbox', name='show_in_dir', value=spaceDefaults.show_in_dir)
             label(for='space_show_in_dir') Show in Server Directory
         
         fieldset.form-item
             legend Permissions
-            +permissions(space.default_permissions)
+            +permissions()
         
         input.form-item(type='submit', value='submit')
     script.

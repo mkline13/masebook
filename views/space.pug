@@ -9,7 +9,7 @@ block content
     if space.description
         p #{space.description} &nbsp;
 
-    if user.space.permissions.view_member_list
+    if user.space.permissions.view_members
         button.link-style(onclick="toggleInfo()") info
         #info.hidden
             h3 Members [#{people.length}]

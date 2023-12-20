@@ -5,15 +5,15 @@ block title
 
 mixin user(u)
     li
-        a(href="/users/" + u.id)= u.display_name
+        a(href="/users/" + u.id)= u.name
         if u.account_type === "administrator"
             span.role [server administrator]
 
 mixin space(s)
     li
         a(href="/spaces/" + s.id)= s.name
-        if s.user_role !== null
-            span.role [#{s.user_role}]
+        if s.role !== 'none'
+            span.role [#{s.role}]
 
 block content
     h1 Server Directory

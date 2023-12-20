@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 
+
 const router = express.Router();
 export default router;
 
@@ -37,9 +38,10 @@ router.route('/')
 router.route('/:user_id')
     .get(async (req, res) => {
         // gets a user's profile
-        const sql = "SELECT id, display_name, description FROM users WHERE id=$1;";
-        const query = await req.db.query(sql, [req.params.user_id]);
-        res.render('user_profile', {profile: query.rows[0]});
+        const sql = "SELECT * FROM users WHERE id=$1;";
+        const result = await req.db.query(sql, [req.params.user_id]);
+        res.locals.profile = result.rows[0];
+        res.render('user_profile');
     })
     .post(async (req, res) => {
         // creates a new user

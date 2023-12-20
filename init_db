@@ -3,5 +3,7 @@
 DBNAME='masebook'
 dropdb -f $DBNAME
 createdb $DBNAME
+echo "## RUNNING SETUP SCRIPT"
 psql -d $DBNAME -f 'model/setup.sql'
+echo "\n## RUNNING TEST DATA SCRIPT"
 psql -d $DBNAME -f 'model/test_data.sql'

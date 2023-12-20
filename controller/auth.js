@@ -1,29 +1,29 @@
 import bcrypt from 'bcryptjs';
+import { defaultUserSettings } from '../model/user_settings.js';
+import { mergeFull } from '../helpers/merge.js'
 
 export async function login_controller(req, res) {
-    // TODO: is this secure?
+    // TODO: VALIDATE INPUTS
     const client_email = req.body.email;
     const client_password = req.body.password;
 
-    const query = await req.db.query("SELECT id, email, hashed_password, account_status, account_type, display_name FROM users WHERE email = $1;", [client_email]);
-    const server_user = query.rows?.[0];
+    const query = {
+        text:  `SELECT * FROM users WHERE email=$1;`,
+        values: [client_email]
+    };
 
-    //TODO: Lookup "user login timing attack username enumeration"
-    if (server_user === undefined || server_user.account_status != 'active') {
-        return res.status(401).send('Invalid username or password');
-    }
+    const result = await req.db.query(query);
+    const server_user = result.rows?.[0];
 
-    bcrypt.compare(client_password, server_user.hashed_password, (err, success) => {
-        if (success) {
+    //TODO: still vulnerable to timing attack?
+    //TODO: what happens if hashed password is undefined? Does that make it hackable? Probably not because of salt...?
+    bcrypt.compare(client_password, server_user?.hashed_password, (err, success) => {
+        if (success && server_user.account_status == 'active') {
             req.session.regenerate(function (err) {
                 if (err) next(err);
 
-                req.session.user = {
-                    id: server_user.id,
-                    email: server_user.email,
-                    account_type: server_user.account_type,
-                    display_name: server_user.display_name,
-                };
+                server_user.settings = mergeFull(defaultUserSettings, server_user.settings);
+                req.session.user = server_user;
 
                 req.session.save(function (err) {
                     if (err) return next(err);
@@ -35,7 +35,7 @@ export async function login_controller(req, res) {
             });
         }
         else {
-            res.status(401).send('Invalid username or password');
+            res.status(401).send('Invalid username and/or password');
         }
     });
 }
