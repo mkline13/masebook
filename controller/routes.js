@@ -52,8 +52,8 @@ export default function routes(app) {
     app.get("/logout", logout_controller);
 
     // ROUTERS
-    app.use('/spaces', checkAuth, user_info_to_locals, space_router);
-    app.use('/users', checkAuth, user_info_to_locals, users_router);
+    app.use('/s', checkAuth, user_info_to_locals, space_router);
+    app.use('/u', checkAuth, user_info_to_locals, users_router);
     app.use('/directory', checkAuth, user_info_to_locals, directory_router);
 
     // ROUTES

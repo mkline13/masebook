@@ -16,7 +16,7 @@ block content
             ul
                 each person in people
                     li
-                        a(href="/users/" + person.id) #{person.name}
+                        a(href="/u/" + person.id) #{person.name}
                         if person.role != 'member'
                             span.role [#{person.role}]
         script.

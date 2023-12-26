@@ -69,7 +69,7 @@ block content
                     },
                     body: JSON.stringify(reformatted),
                 }
-                fetch('/spaces', fetchOptions)
+                fetch('/s', fetchOptions)
                     .then(res => {
                         if (res.redirected) {
                             window.location.href = res.url;
