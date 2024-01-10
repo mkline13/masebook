@@ -1,5 +1,5 @@
 import express from 'express';
-import { levelToRole } from '../model/space_settings.js';
+import { levelToRole } from '../public/js/masebook.js';
 
 const router = express.Router();
 export default router;

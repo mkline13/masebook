@@ -27,7 +27,7 @@ CREATE TABLE spaces (
     id                  SERIAL              PRIMARY KEY,
     creation_date       TIMESTAMP           NOT NULL DEFAULT now(),
     creator_id          INTEGER             REFERENCES users,
-    name                title_t             NOT NULL,
+    name                title_t             UNIQUE NOT NULL,
     active              BOOLEAN             DEFAULT true,
     settings            JSONB               NOT NULL DEFAULT '{}'::JSONB,
     permissions         JSONB               NOT NULL DEFAULT '{}'::JSONB

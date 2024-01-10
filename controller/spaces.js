@@ -1,8 +1,7 @@
 import express from 'express';
 import { body, checkExact, matchedData, validationResult } from 'express-validator';
 
-import { defaultSpaceSettings, defaultSpacePermissions, levelToRole } from '../model/space_settings.js';
-import { mergeFull } from '../helpers/merge.js';
+import { defaultSpaceSettings, defaultSpacePermissions, levelToRole, mergeFull, mergeExludeDefaults } from '../public/js/masebook.js';
 
 const router = express.Router();
 export default router;
@@ -24,7 +23,7 @@ async function getSpaceInfo(req, res, next) {
                     FROM
                         spaces s
                         FULL OUTER JOIN memberships m ON m.space_id=s.id AND m.user_id=$1
-                        WHERE s.id=$2;
+                        WHERE s.name=$2 AND s.active=true;
                     `,
             values: [user.id, space_id],
         }
@@ -72,7 +71,7 @@ router.route('/')
     })
     .post(
         body('settings').isObject(),
-        body('permissions').isArray(),
+        body('permissions').isObject(),
         body('settings.name').trim().notEmpty().escape(),
         body('settings.description').optional().trim().escape().default(''),
         body('settings.visible').optional().isBoolean().default('false'),
@@ -104,6 +103,20 @@ router.route('/new')
     })
 
 router.route('/:space_id')
+    .head(getSpaceInfo, async (req, res) => {
+        // used to check if a space identifier is taken
+
+        const space = res.locals.space;
+        const user = res.locals.user;
+        console.log(space);
+        // if space doesn't exist OR is not visible to this particular user, send error
+        if (space === undefined || !user.space.visible) {
+            res.status(404).send("Not found");
+            return;
+        }
+
+        res.status(200).send("OK");
+    })
     .get(getSpaceInfo, async (req, res) => {
         const space = res.locals.space;
         const user = res.locals.user;
@@ -134,8 +147,10 @@ router.route('/:space_id')
         }
 
         // use role names instead of numbers
-        for (let i=0; i<res.locals.people.length; i++) {
-            res.locals.people[i].role = levelToRole[res.locals.people[i].role];
+        if (res.locals.people) {
+            for (let i=0; i<res.locals.people.length; i++) {
+                res.locals.people[i].role = levelToRole[res.locals.people[i].role];
+            }
         }
 
         // fetch posts

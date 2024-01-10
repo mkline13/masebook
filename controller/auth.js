@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { defaultUserSettings } from '../model/user_settings.js';
-import { mergeFull } from '../helpers/merge.js'
+import { defaultUserSettings, mergeFull } from '../public/js/masebook.js';
 
 export async function login_controller(req, res) {
     // TODO: VALIDATE INPUTS

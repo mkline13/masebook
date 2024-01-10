@@ -93,8 +93,6 @@ textarea.post-text {
 
 /* FORM STYLING */
 
-
-
 fieldset {
     width: fit-content;
     margin: 0;
@@ -111,9 +109,21 @@ fieldset label {
 
 #space-editor > fieldset {
     display: grid;
-    grid-template-columns: min-content min-content;
+    grid-template-columns: repeat(6, min-content);
     column-gap: 1rem;
     row-gap: 0.5rem;
+}
+
+#permissions > span.field-label {
+    white-space: nowrap;
+    margin-right: 1rem;
+    margin-left: 1rem;
+    text-align: right;
+}
+
+span.permissions-col-header {
+    font-size: smaller;
+    white-space: nowrap;
 }
 
 form > * + * {
@@ -124,14 +134,24 @@ form > * + * {
     margin-top: 1rem;
 }
 
-.form-item.block > * {
-    display: block;
-    margin: 0;
-}
-
 input[type=checkbox]:first-child + * {
     margin-left: 0.5rem;
 }
+
+span.field-label {
+    display: inline;
+}
+
+span.field-label.block {
+    display: block;
+}
+
+span.field-hint {
+    display: block;
+    font-size: smaller;
+}
+
+
 
 /* === POSTS === */
 article.post {
