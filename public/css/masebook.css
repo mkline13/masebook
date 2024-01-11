@@ -134,7 +134,6 @@ form > * + * {
     margin-top: 1rem;
 }
 
-
 input[type=checkbox]:first-child + * {
     margin-left: 0.5rem;
 }

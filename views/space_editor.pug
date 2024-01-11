@@ -1,7 +1,7 @@
 extends masebook.pug
 
 block title
-    - const titleText = space.name ? `Edit Space | ${space.name}` : 'New Space'
+    - const titleText = space ? `Edit Space | ${space.name}` : 'New Space'
     title= titleText
 
 mixin textField(id, label, hint)
@@ -17,21 +17,13 @@ mixin textField(id, label, hint)
 mixin checkBox(id, label, checked)
     .form-item
         label(for=id)
-            input(id=id, type='checkbox', name=id, checked=checked)
+            input(id=id, type='checkbox', name=id, checked=checked, value='true')
             span.field-label=label
 
 mixin permission(id, label, default_role)
     span.field-label=label
-    - for (let i=0; i<roles.length; i++)
+    - for (let i=0; i<levelToRole.length; i++)
         input(type='radio', name=id, value=i, checked=(i === default_role))
-
-
-mixin options(default_index)
-    - for (let i=0; i<roles.length; i++ )
-        if (i == default_index)
-            option(value=i selected)= roles[i]
-        else
-            option(value=i)= roles[i]
 
 block content
     h1= titleText
@@ -41,14 +33,14 @@ block content
             'Title'
         )(minlength=1, maxlength=64, required)
         +textField(
-            'shortname',
-            'Short name',
-            'A unique identifier for this space that will be used in its URL. Must contain only alphanumeric characters and underscores. Cannot start with a digit or contain spaces.'
-        )(minlength=1, maxlength=32, required)
-        +textField(
             's_description',
             'Description'
         )
+        +textField(
+            'shortname',
+            'shortname',
+            'A unique identifier for this space that will be used in its URL. Can only contain alphanumeric characters and underscores. Must start with a character from the alphabet.'
+        )(minlength=3, maxlength=32, required, pattern='^[a-z][a-z0-9_]{2,31}$')
 
         +checkBox('s_public', 'Public (visible to non-members)', false)
         +checkBox('s_show_in_dir', 'Show in Server Directory', true)
@@ -56,7 +48,7 @@ block content
         fieldset.form-item#permissions-editor
             legend Permissions
             span.permissions-col-header='role required to...'
-            each role in roles
+            each role in levelToRole
                 span.permissions-col-header=role
             +permission('p_view_members', 'view members', 1)
             +permission('p_view_posts', 'view posts', 1)
@@ -67,7 +59,7 @@ block content
             +permission('p_delete_comments', 'view comments', 2)
         
         input.form-item(type='submit', value='submit')
-    script.
+    script(type='module').
         import { foldSpace } from '/public/js/masebook.js';
 
         const form = document.getElementById('space-editor');
@@ -76,7 +68,22 @@ block content
             const data = new FormData(form);
 
             // Format data for use by backend
-            const space = foldSpace(data);
+            const space = {
+                settings: {},
+                permissions: {}
+            }
+
+            for (const [k,v] of data.entries()) {
+                if (k.startsWith('s_')) {
+                    space.settings[k.substring(2)] = v;
+                }
+                else if (k.startsWith('p_')) {
+                    space.permissions[k.substring(2)] = parseInt(v);
+                }
+                else {
+                    space[k] = v;
+                }
+            }
 
             // Send data to server
             try {

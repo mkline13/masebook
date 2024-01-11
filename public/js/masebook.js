@@ -47,7 +47,7 @@ export function flattenSpace(space) {
 
     const flattened = {};
 
-    for (const [k,v] in Object.entries(space)) {
+    for (const [k,v] of Object.entries(space)) {
         flattened[k] = v;
     }
 
@@ -57,11 +57,11 @@ export function flattenSpace(space) {
     const permissions = flattened.permissions;
     delete flattened.permissions;
 
-    for (const [k,v] in Object.entries(settings)) {
+    for (const [k,v] of Object.entries(settings)) {
         flattened['s_' + k] = v;
     }
 
-    for (const [k,v] in Object.entries(permissions)) {
+    for (const [k,v] of Object.entries(permissions)) {
         flattened['p_' + k] = v;
     }
 
