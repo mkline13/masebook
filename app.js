@@ -5,6 +5,7 @@ import path from 'path';
 import routes from './controller/routes.js';
 
 import { fileURLToPath } from 'url';
+import { levelToRole } from './public/js/masebook.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -39,6 +40,7 @@ export default async function createApp(database) {
     app.use((req, res, next) => {
         // ensures that database is passed to all routes
         req.db = database;
+        res.locals.levelToRole = levelToRole;
 
         next();
     });

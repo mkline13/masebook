@@ -93,6 +93,8 @@ textarea.post-text {
 
 /* FORM STYLING */
 
+
+
 fieldset {
     width: fit-content;
     margin: 0;
@@ -107,23 +109,21 @@ fieldset label {
     white-space: nowrap;
 }
 
-#space-editor > fieldset {
+#space-editor > #permissions-editor {
     display: grid;
-    grid-template-columns: repeat(6, min-content);
+    grid-template-columns: max-content repeat(5, min-content);
     column-gap: 1rem;
     row-gap: 0.5rem;
 }
 
-#permissions > span.field-label {
-    white-space: nowrap;
-    margin-right: 1rem;
-    margin-left: 1rem;
-    text-align: right;
+.permissions-col-header {
+    font-size: smaller;
 }
 
-span.permissions-col-header {
-    font-size: smaller;
-    white-space: nowrap;
+#space-editor > #permissions-editor > .field-label {
+    text-align: right;
+    margin-left: 1rem;
+    margin-right: 1rem;
 }
 
 form > * + * {
@@ -134,16 +134,9 @@ form > * + * {
     margin-top: 1rem;
 }
 
+
 input[type=checkbox]:first-child + * {
     margin-left: 0.5rem;
-}
-
-span.field-label {
-    display: inline;
-}
-
-span.field-label.block {
-    display: block;
 }
 
 span.field-hint {
@@ -151,7 +144,32 @@ span.field-hint {
     font-size: smaller;
 }
 
+span.field-label.block {
+    display:block;
+}
 
+#permissions-table {
+    font-size: smaller;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+#permissions-table thead {
+    border-bottom: 1px solid black;
+}
+
+#permissions-table > tbody tr:nth-child(even) {
+    background-color: aliceblue;
+}
+
+#permissions-table td + *, th + * {
+    padding-left: 1rem;
+}
+
+#permissions-table td:nth-child(2) {
+    text-align: center;
+    font-size: smaller;
+}
 
 /* === POSTS === */
 article.post {

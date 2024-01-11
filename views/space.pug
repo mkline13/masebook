@@ -1,29 +1,41 @@
 extends masebook.pug
 
 block title
-    title Masebook | #{space.name}
+    title Masebook | #{space.settings.title}
 
 block content
-    h1 #{space.name}
+    h1 #{space.settings.title}
 
-    if space.description
-        p #{space.description} &nbsp;
+    if space.settings.description
+        p #{space.settings.description} &nbsp;
 
-    if user.space.permissions.view_members
-        button.link-style(onclick="toggleInfo()") info
-        #info.hidden
+    button.link-style(onclick="toggleInfo()") info
+    #info.hidden
+        h3 Permissions
+        table#permissions-table
+            thead
+                tr
+                    th action
+                    th minimum role
+            tbody
+                - for (const [k,v] of Object.entries(space.permissions))
+                    tr
+                        td=k.replaceAll('_', ' ')
+                        td [#{levelToRole[v]}]
+                
+        if user.space.permissions.view_members
             h3 Members [#{people.length}]
             ul
                 each person in people
                     li
                         a(href="/u/" + person.id) #{person.name}
-                        if person.role != 'member'
-                            span.role [#{person.role}]
-        script.
-            const info = document.getElementById('info');
-            function toggleInfo() {
-                info.classList.toggle('hidden');
-            }
+                        if person.role != 1
+                            span.role [#{levelToRole[person.role]}]
+    script.
+        const info = document.getElementById('info');
+        function toggleInfo() {
+            info.classList.toggle('hidden');
+        }
     
     if user.space.permissions.view_posts || user.space.permissions.create_posts
         h2 Posts
@@ -32,7 +44,7 @@ block content
         .spacer
             button.link-style#post_editor_button(onclick="togglePostEditor()") create post
             form#new_post_form.hidden(method='post')
-                label(for='post') Posting as #{user.display_name}...
+                label(for='post') Posting as '#{user.shortname}'...
                 .post-text-padding
                     textarea.post-text(name='post', wrap='hard', oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
                 input(type='submit' value='post') 

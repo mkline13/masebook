@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, checkExact, matchedData, validationResult } from 'express-validator';
 
-import { defaultSpaceSettings, defaultSpacePermissions, levelToRole, mergeFull, mergeExludeDefaults } from '../public/js/masebook.js';
+import { levelToRole, foldSpace, flattenSpace } from '../public/js/masebook.js';
 
 const router = express.Router();
 export default router;
@@ -9,48 +9,44 @@ export default router;
 
 async function getSpaceInfo(req, res, next) {
     const user = res.locals.user;
-    const space_id = req.params.space_id; //TODO: sanitize
+    const space_shortname = req.params.space_id; //TODO: sanitize
 
     user.space = {};
 
     // get space info
+    let space;
+
     {
         const query = {
             text:  `SELECT
                         s.*,
-                        COALESCE(m.user_role, 0) AS user_role,
-                        m.show_in_profile
+                        COALESCE(m.user_role, 0) AS user_role
                     FROM
                         spaces s
                         FULL OUTER JOIN memberships m ON m.space_id=s.id AND m.user_id=$1
-                        WHERE s.name=$2 AND s.active=true;
+                        WHERE s.shortname=$2 AND s.space_status='active';
                     `,
-            values: [user.id, space_id],
+            values: [user.id, space_shortname],
         }
         const result = await req.db.query(query);
-        res.locals.space = result.rows[0];
+        const data = result.rows[0];
+
+        if (data === undefined) {
+            next();
+            return;
+        }
+
+        // format data correctly
+        space = foldSpace(data);
     }
-
-    if (res.locals.space === undefined) {
-        next(); return;
-    }
-
-    const space = res.locals.space;
-
-    // load defaults and merge with settings from the database
-    space.settings = mergeFull(defaultSpaceSettings, space.settings);
-    space.permissions = mergeFull(defaultSpacePermissions, space.permissions);
 
     // put membership info into user object for tidiness
     user.space.role = space.user_role;
     delete space.user_role;
 
-    user.space.show_in_profile = space.show_in_profile;
-    delete space.show_in_profile;
-
     // compute settings based on membership
-    user.space.visible = space.settings.visible || user.space.role !== null;
-    user.space.show_in_dir = (space.settings.visible && space.settings.show_in_dir) || user.space.role !== null;
+    user.space.visible = space.settings.public || user.space.role !== null;
+    user.space.show_in_dir = (space.settings.public && space.settings.show_in_dir) || user.space.role !== null;
 
     // compute permissions based on membership
     user.space.permissions = {};
@@ -59,7 +55,7 @@ async function getSpaceInfo(req, res, next) {
     }
 
     // console.log(res.locals.user.space);
-    
+    res.locals.space = space;
     next();
 }
 
@@ -93,10 +89,6 @@ router.route('/')
 
 router.route('/new')
     .get(async (req, res) => {
-        res.locals.defaults = {
-            settings: defaultSpaceSettings,
-            permissions: defaultSpacePermissions
-        };
         res.locals.roles = levelToRole;
         res.locals.space = {};
         res.render('space_editor');
@@ -134,23 +126,16 @@ router.route('/:space_id')
                 text:  `SELECT
                             m.user_id AS id,
                             m.user_role AS role,
-                            COALESCE(u.settings->>'display_name', u.username) AS name
+                            u.shortname AS name
                         FROM
                             memberships m
                             JOIN users u ON m.user_id=u.id
                             WHERE m.space_id=$1
-                            ORDER BY m.user_role DESC, name ASC;`,
+                            ORDER BY m.user_role DESC, u.shortname ASC;`,
                 values: [space.id]
             }
             const result = await req.db.query(query);
             res.locals.people = result.rows;
-        }
-
-        // use role names instead of numbers
-        if (res.locals.people) {
-            for (let i=0; i<res.locals.people.length; i++) {
-                res.locals.people[i].role = levelToRole[res.locals.people[i].role];
-            }
         }
 
         // fetch posts
@@ -159,11 +144,11 @@ router.route('/:space_id')
                 name: "get_posts_for_space",
                 text:  `SELECT
                             p.*,
-                            COALESCE(u.settings->>'display_name', u.username) AS author_name
+                            u.shortname AS author_name
                         FROM
                             posts p
                             JOIN users u ON p.author_id = u.id
-                            WHERE space_id=$1
+                            WHERE p.space_id=$1
                             ORDER BY p.id DESC;`,
                 values: [space.id]
             }

@@ -1,6 +1,8 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 
+import { foldUser } from '../public/js/masebook.js';
+
 
 const router = express.Router();
 export default router;
@@ -40,7 +42,7 @@ router.route('/:user_id')
         // gets a user's profile
         const sql = "SELECT * FROM users WHERE id=$1;";
         const result = await req.db.query(sql, [req.params.user_id]);
-        res.locals.profile = result.rows[0];
+        res.locals.profile = foldUser(result.rows[0]);
         res.render('user_profile');
     })
     .post(async (req, res) => {

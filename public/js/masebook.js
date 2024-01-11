@@ -1,7 +1,7 @@
 // UNIQUE IDENTIFIERS
-export const uniqueIdentifierRegexPattern = /^[a-z][a-z0-9_]{2,31}$/;
+export const shortnameRegexPattern = /^[a-z][a-z0-9_]{2,31}$/;
 /*
- * Masebook unique identifiers must have the following characteristics:
+ * Masebook shortnames must have the following characteristics:
  *   - must be between 3 and 32 characters long
  *   - must consist of only alphanumeric characters and underscores
  *   - must start with a lowercase letter
@@ -15,54 +15,74 @@ export const roleToLevel = {};  // example: {none: 0 ...}
 for (let i=0; i<levelToRole.length; i++) {
     roleToLevel[levelToRole[i]] = i;
 }
+roleToLevel[null] = 0;
 Object.freeze(roleToLevel);
 
-// SPACE DEFAULTS
-export const defaultSpaceSettings = {
-    description: '',
-    visible: false,
-    show_in_dir: false,
-}
-Object.freeze(defaultSpaceSettings);
-
-export const defaultSpacePermissions = {
-    view_members:       roleToLevel.none,
-    view_posts:         roleToLevel.none,
-    create_posts:       roleToLevel.member,
-    delete_posts:       roleToLevel.mod,
-    view_comments:      roleToLevel.none,
-    create_comments:    roleToLevel.member,
-    delete_comments:    roleToLevel.mod,
-}
-Object.freeze(defaultSpacePermissions);
-
-// USER SETTINGS
-export const defaultUserSettings = {
-    display_name: '',
-    description: '',
-    show_in_dir: false
-}
-Object.freeze(defaultUserSettings);
-
-// MERGING SETTINGS/PERMISSIONS OBJECTS
-export function mergeFull (defaults, obj) {
-    // similar to 'Object.assign(defaults, obj);
-    // merges two objects, ignoring keys that are not found in the 'defaults' object
-    // only shallow-copies, references in the new object may be the same as in the old ones
-    const result = {};
-    for (const k in defaults) {
-        result[k] = obj[k] ?? defaults[k];
+// TODO: this probably shouldn't be public
+// FORMATTING SPACE OBJECTS
+export function foldSpace(data) {
+    // makes copy of flat Space (as stored in database or provided by web form) and folds settings and permissions into their own namespaces
+    const space = {
+        settings: {},
+        permissions: {}
     }
-    return result;
-}
 
-export function mergeExludeDefaults (defaults, obj) {
-    // similar to mergeFull but discards values that are the same as the defaults
-    const result = {};
-    for (const k in defaults) {
-        if (obj[k] && obj[k] != defaults[k]) {
-            result[k] = obj[k];
+    for (const [k,v] of Object.entries(data)) {
+        if (k.startsWith('s_')) {
+            space.settings[k.substring(2)] = v;
+        }
+        else if (k.startsWith('p_')) {
+            space.permissions[k.substring(2)] = v;
+        }
+        else {
+            space[k] = v;
         }
     }
-    return result;
+
+    return space;
+}
+
+export function flattenSpace(space) {
+    // makes copy of space with all members flattened to one level deep
+
+    const flattened = {};
+
+    for (const [k,v] in Object.entries(space)) {
+        flattened[k] = v;
+    }
+
+    const settings = flattened.settings;
+    delete flattened.settings;
+
+    const permissions = flattened.permissions;
+    delete flattened.permissions;
+
+    for (const [k,v] in Object.entries(settings)) {
+        flattened['s_' + k] = v;
+    }
+
+    for (const [k,v] in Object.entries(permissions)) {
+        flattened['p_' + k] = v;
+    }
+
+    return flattened;
+}
+
+// FORMATTING USER OBJECTS
+export function foldUser(data) {
+    // makes copy of flat Space (as stored in database or provided by web form) and folds settings and permissions into their own namespaces
+    const user = {
+        settings: {}
+    }
+
+    for (const [k,v] of Object.entries(data)) {
+        if (k.startsWith('s_')) {
+            user.settings[k.substring(2)] = v;
+        }
+        else {
+            user[k] = v;
+        }
+    }
+
+    return user;
 }

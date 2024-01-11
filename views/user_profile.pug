@@ -1,17 +1,13 @@
 extends masebook.pug
 
 block title
-    title Masebook | #{profile.username}
+    title Masebook | #{profile.shortname}
 
 block content
-    if profile.settings.display_name
-        h1 #{profile.settings.display_name}
-            span.username  (#{profile.username})
-    else
-        h1= profile.username
+    h1= profile.shortname
     
     img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="64" height="64")
-    if profile.settings.description
-        p #{profile.settings.description} &nbsp;
+    if profile.settings.profile_desc
+        p #{profile.settings.profile_desc} &nbsp;
     else
         p no description...

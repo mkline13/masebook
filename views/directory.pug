@@ -11,7 +11,7 @@ mixin user(u)
 
 mixin space(s)
     li
-        a(href="/s/" + s.id)= s.name
+        a(href="/s/" + s.shortname)= s.title
         if s.role !== 'none'
             span.role [#{s.role}]
 

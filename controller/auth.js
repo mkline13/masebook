@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { defaultUserSettings, mergeFull } from '../public/js/masebook.js';
+import { foldUser } from '../public/js/masebook.js';
 
 export async function login_controller(req, res) {
     // TODO: VALIDATE INPUTS
@@ -16,13 +16,12 @@ export async function login_controller(req, res) {
 
     //TODO: still vulnerable to timing attack?
     //TODO: what happens if hashed password is undefined? Does that make it hackable? Probably not because of salt...?
-    bcrypt.compare(client_password, server_user?.hashed_password, (err, success) => {
+    bcrypt.compare(client_password, server_user?.password, (err, success) => {
         if (success && server_user.account_status == 'active') {
             req.session.regenerate(function (err) {
                 if (err) next(err);
 
-                server_user.settings = mergeFull(defaultUserSettings, server_user.settings);
-                req.session.user = server_user;
+                req.session.user = foldUser(server_user);
 
                 req.session.save(function (err) {
                     if (err) return next(err);

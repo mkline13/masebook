@@ -18,10 +18,10 @@ mixin checkBox(id, label, checked)
     .form-item
         label(for=id)
             input(id=id, type='checkbox', name=id, checked=checked)
-            span.field-label.inline=label
+            span.field-label=label
 
 mixin permission(id, label, default_role)
-    span.field-label.block=label
+    span.field-label=label
     - for (let i=0; i<roles.length; i++)
         input(type='radio', name=id, value=i, checked=(i === default_role))
 
@@ -37,55 +37,48 @@ block content
     h1= titleText
     form#space-editor
         +textField(
-            'identifier',
-            'Unique Identifier',
-            'Will be used in the URL for this space. Must contain only alphanumeric characters and underscores. Cannot start with a digit or contain spaces.'
+            's_title',
+            'Title'
         )(minlength=1, maxlength=64, required)
         +textField(
-            'display_name',
-            'Display Name'
-        )(minlength=1, maxlength=64, required)
+            'shortname',
+            'Short name',
+            'A unique identifier for this space that will be used in its URL. Must contain only alphanumeric characters and underscores. Cannot start with a digit or contain spaces.'
+        )(minlength=1, maxlength=32, required)
         +textField(
-            'description',
+            's_description',
             'Description'
-        )(minlength=1, maxlength=256)
-        +checkBox('visible', 'Visible to non-members', defaults.settings.visible)
-        +checkBox('show_in_dir', 'Show in Server Directory', defaults.settings.show_in_dir)
+        )
+
+        +checkBox('s_public', 'Public (visible to non-members)', false)
+        +checkBox('s_show_in_dir', 'Show in Server Directory', true)
         
-        fieldset.form-item#permissions
+        fieldset.form-item#permissions-editor
             legend Permissions
             span.permissions-col-header='role required to...'
             each role in roles
                 span.permissions-col-header=role
-            +permission('view_members', 'view members', 1)
-            +permission('view_posts', 'view posts', 1)
-            +permission('create_posts', 'create posts', 1)
-            +permission('delete_posts', 'delete posts', 2)
-            +permission('view_comments', 'view comments', 1)
-            +permission('create_comments', 'view comments', 1)
-            +permission('delete_comments', 'view comments', 2)
+            +permission('p_view_members', 'view members', 1)
+            +permission('p_view_posts', 'view posts', 1)
+            +permission('p_create_posts', 'create posts', 1)
+            +permission('p_delete_posts', 'delete posts', 2)
+            +permission('p_view_comments', 'view comments', 1)
+            +permission('p_create_comments', 'view comments', 1)
+            +permission('p_delete_comments', 'view comments', 2)
         
         input.form-item(type='submit', value='submit')
     script.
+        import { foldSpace } from '/public/js/masebook.js';
+
         const form = document.getElementById('space-editor');
         form.addEventListener('submit', async event => {
             event.preventDefault();
             const data = new FormData(form);
 
-            const reformatted = {
-                settings: {},
-                permissions: []
-            };
+            // Format data for use by backend
+            const space = foldSpace(data);
 
-            for (const [k,v] of data.entries()) {
-                if (k.startsWith('p_')) {
-                    reformatted.permissions.push([k.substring(2),v]);
-                }
-                else {
-                    reformatted.settings[k] = v;
-                }
-            }
-
+            // Send data to server
             try {
                 const fetchOptions = {
                     method: 'POST',
@@ -93,8 +86,9 @@ block content
                         "Content-Type": "application/json",
                         Accept: "application/json"
                     },
-                    body: JSON.stringify(reformatted),
+                    body: JSON.stringify(space),
                 }
+                
                 fetch('/s', fetchOptions)
                     .then(res => {
                         if (res.redirected) {

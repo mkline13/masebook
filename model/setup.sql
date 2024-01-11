@@ -1,6 +1,7 @@
-CREATE DOMAIN title_t AS VARCHAR(64);
-CREATE DOMAIN description_t AS VARCHAR(256);
-CREATE DOMAIN role_t AS INTEGER;
+
+CREATE DOMAIN shortname_t AS VARCHAR(32);
+CREATE DOMAIN email_t AS VARCHAR(320);          -- https://en.wikipedia.org/wiki/Email_address#Syntax
+CREATE DOMAIN bcrypt_hash_t AS VARCHAR(60);     -- https://en.wikipedia.org/wiki/Bcrypt#Description
 
 /*
  * USERS
@@ -11,10 +12,13 @@ CREATE TABLE users (
     id              SERIAL              PRIMARY KEY,
     account_status  account_status_t    NOT NULL DEFAULT 'active',
     account_type    account_type_t      NOT NULL DEFAULT 'user',
-    email           VARCHAR(255)        UNIQUE NOT NULL,
-    username        VARCHAR(64)         UNIQUE NOT NULL,
-    hashed_password VARCHAR(255)        NOT NULL, -- TODO: check length of hashed passwords
-    settings        JSONB               NOT NULL DEFAULT '{}'::JSONB
+    shortname       shortname_t         UNIQUE NOT NULL,
+    email           email_t             UNIQUE NOT NULL,
+    password        bcrypt_hash_t       NOT NULL,
+
+    /* SETTINGS prefixed with 's_' for easier processing by JS */
+    s_show_in_dir     BOOLEAN             NOT NULL DEFAULT false,
+    s_profile_desc    VARCHAR             DEFAULT ''
 );
 
 /*
@@ -22,15 +26,46 @@ CREATE TABLE users (
  *      Spaces are where users can pass back and forth messages to each other. They can either be used for direct messages, group pages, or even user walls.
  */
 
+CREATE TABLE roles (
+    level           INTEGER              PRIMARY KEY,
+    name            VARCHAR(16)          UNIQUE NOT NULL
+);
 
+INSERT INTO roles(level, name) VALUES
+    (1, 'member'),
+    (2, 'mod'),
+    (3, 'admin'),
+    (4, 'owner');
+
+-- TODO: revoke INSERT, UPDATE, DELETE for all users on roles table??
+
+CREATE TYPE space_status_t AS ENUM ('active', 'inactive');  -- using enum because there may be additional statuses later
 CREATE TABLE spaces (
     id                  SERIAL              PRIMARY KEY,
+    space_status        space_status_t      DEFAULT 'active',
     creation_date       TIMESTAMP           NOT NULL DEFAULT now(),
-    creator_id          INTEGER             REFERENCES users,
-    name                title_t             UNIQUE NOT NULL,
-    active              BOOLEAN             DEFAULT true,
-    settings            JSONB               NOT NULL DEFAULT '{}'::JSONB,
-    permissions         JSONB               NOT NULL DEFAULT '{}'::JSONB
+    creator_id          INTEGER             NOT NULL REFERENCES users,
+    shortname           shortname_t         UNIQUE NOT NULL,
+
+    /* SETTINGS prefixed with 's_' for easier processing by JS */
+    s_title             VARCHAR(64)         NOT NULL,                -- title of the space as seen by users on the space page and in the directory
+    s_description       VARCHAR             DEFAULT '',              -- description of the space to be seen by users, hopefully will be part of the space search function in the future
+    s_public            BOOLEAN             NOT NULL DEFAULT false,  -- whether or not the space can be seen by non-members
+    s_show_in_dir       BOOLEAN             NOT NULL DEFAULT true,   -- if the space is public, determines if it can be seen in the directory by non-members
+    
+    /*
+     * PERMISSIONS
+     *     - prefixed with 'p_'
+     *     - each permission contains the minimum credential required to perform an action
+     *     - NULL implies that no credential is required to perform an action
+     */
+    p_view_members      INTEGER             REFERENCES roles DEFAULT 1,
+    p_view_posts        INTEGER             REFERENCES roles DEFAULT 1,
+    p_create_posts      INTEGER             REFERENCES roles DEFAULT 1,
+    p_delete_posts      INTEGER             REFERENCES roles DEFAULT 2,
+    p_view_comments     INTEGER             REFERENCES roles DEFAULT 1,
+    p_create_comments   INTEGER             REFERENCES roles DEFAULT 1,
+    p_delete_comments   INTEGER             REFERENCES roles DEFAULT 2
 );
 
 /*
@@ -38,22 +73,22 @@ CREATE TABLE spaces (
  *      Defines a user's credential level within a particular space.
  */
 CREATE TABLE memberships (
-    user_id             INT             NOT NULL REFERENCES users ON DELETE CASCADE,
-    space_id            INT             NOT NULL REFERENCES spaces ON DELETE CASCADE,
-    user_role           role_t          NOT NULL DEFAULT 1::role_t,  /* the role of the user within a space */
-    show_in_profile     BOOLEAN         NOT NULL DEFAULT false,  -- TODO: implement this in front-end
+    user_id             INTEGER             NOT NULL REFERENCES users ON DELETE CASCADE,
+    space_id            INTEGER             NOT NULL REFERENCES spaces ON DELETE CASCADE,
+    user_role           INTEGER             NOT NULL REFERENCES roles DEFAULT 1,  /* the role of the user within a space */
     CONSTRAINT pkey     PRIMARY KEY (user_id, space_id)
 );
 
 CREATE OR REPLACE FUNCTION assign_owner() RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO memberships(space_id, user_id, user_role) VALUES
-		(NEW.id, NEW.creator_id, 4::role_t);
+		(NEW.id, NEW.creator_id, 4);
 	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER assign_owner AFTER INSERT ON spaces
+CREATE TRIGGER assign_owner
+    AFTER INSERT ON spaces
 	FOR EACH ROW EXECUTE FUNCTION assign_owner();
 
 /*
@@ -106,7 +141,7 @@ CREATE TABLE pokes (
  */
 
 /* convert email address to user id */
-CREATE OR REPLACE FUNCTION email_to_user(email_address text)
+CREATE OR REPLACE FUNCTION email_to_user(email_address email_t)
 RETURNS INTEGER AS $$
 DECLARE
     user_id INTEGER;
@@ -118,32 +153,11 @@ $$ LANGUAGE plpgsql;
 
 /* convert user id to display name */
 CREATE OR REPLACE FUNCTION user_to_name(user_id INT)
-RETURNS title_t AS $$
+RETURNS shortname_t AS $$
 DECLARE
-    user_name title_t;
+    shortname shortname_t;
 BEGIN
-    SELECT display_name INTO user_name FROM users WHERE users.id = user_id;
+    SELECT users.shortname INTO shortname FROM users WHERE users.id = user_id;
     RETURN user_name;
 END;
 $$ LANGUAGE plpgsql;
-
-/* get user's member spaces */
-CREATE OR REPLACE FUNCTION get_member_spaces(user_id_ INT)
-RETURNS TABLE(
-    user_id INT,
-    role role_t,
-    id INT,
-    name title_t,
-    description description_t,
-    creation_date TIMESTAMP
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT m.user_id, m.user_role, s.id, s.name, s.description, s.creation_date
-    FROM spaces s
-    LEFT JOIN memberships m ON m.space_id = s.id
-    WHERE m.user_id = user_id_
-    ORDER BY m.user_role, s.name;
-END;
-$$ LANGUAGE plpgsql;
-
