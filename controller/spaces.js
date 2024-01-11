@@ -22,7 +22,7 @@ async function getSpaceInfo(req, res, next) {
         const query = {
             text:  `SELECT
                         s.*,
-                        COALESCE(m.user_role, 0) AS user_role
+                        m.user_role
                     FROM
                         spaces s
                         FULL OUTER JOIN memberships m ON m.space_id=s.id AND m.user_id=$1
