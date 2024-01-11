@@ -6,7 +6,7 @@ function buildParamList(end) {
     return list;
 }
 
-function buildInsertQuery(table, obj) {
+export function buildInsertQuery(table, obj) {
     // NOTE: this function is not secure. Use data validation before building the query.
     const keys = Object.keys(obj);
     const params = buildParamList(keys.length);

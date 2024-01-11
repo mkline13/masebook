@@ -1,10 +1,12 @@
 import express from 'express';
 import { body, checkExact, matchedData, validationResult } from 'express-validator';
 
+import { buildInsertQuery } from '../helpers/query_builders.js';
 import { levelToRole, foldSpace, flattenSpace } from '../public/js/masebook.js';
 
 const router = express.Router();
 export default router;
+
 
 
 async function getSpaceInfo(req, res, next) {
@@ -66,49 +68,23 @@ router.route('/')
         res.redirect('/directory');
     })
     .post(
-        body('settings').isObject(),
-        body('permissions').isObject(),
-        body('settings.name').trim().notEmpty().escape(),
-        body('settings.description').optional().trim().escape().default(''),
-        body('settings.visible').optional().isBoolean().default('false'),
-        body('settings.show_in_dir').optional().isBoolean().default('false'),
-        body('permissions.*').isArray(),
-        body('permissions.*.*').isString(),
         async (req, res) => {
             // creates a new space
-            const validationErrors = validationResult(req); // TODO: handle validation errors
-            const data = matchedData(req);
-            data.settings.creator_id = req.session.user.id;
+            const space = req.body;
+            space.creator_id = req.session.user.id;
 
-            // TODO: implement
+            // TODO: validate fields
+
+            // insert into db
+            const flattened = flattenSpace(space);
+            const query = buildInsertQuery('spaces', flattened);
+            const result = await req.db.query(query);
 
             res.redirect('/directory');
         }
     );
 
-
-router.route('/new')
-    .get(async (req, res) => {
-        res.locals.roles = levelToRole;
-        res.locals.space = {};
-        res.render('space_editor');
-    })
-
 router.route('/:space_id')
-    .head(getSpaceInfo, async (req, res) => {
-        // used to check if a space identifier is taken
-
-        const space = res.locals.space;
-        const user = res.locals.user;
-        console.log(space);
-        // if space doesn't exist OR is not visible to this particular user, send error
-        if (space === undefined || !user.space.visible) {
-            res.status(404).send("Not found");
-            return;
-        }
-
-        res.status(200).send("OK");
-    })
     .get(getSpaceInfo, async (req, res) => {
         const space = res.locals.space;
         const user = res.locals.user;
