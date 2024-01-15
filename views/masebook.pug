@@ -7,7 +7,9 @@ mixin post(p)
     article.post
         img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="32" height="32")
         h4= p.author_name
-            span.post-date  • #{p.creation_date}
+            //- TODO: support dynamic localization
+            - const dateString = p.creation_date.toLocaleString('en-US', { timeZone: 'PST' })
+            span.post-date  • #{dateString}
         .content
             +text2paragraphs(p.contents)
 
