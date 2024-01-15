@@ -18,11 +18,13 @@ block content
                 tr
                     th action
                     th minimum role
+                    th allowed
             tbody
                 - for (const [k,v] of Object.entries(space.permissions))
                     tr
                         td=k.replaceAll('_', ' ')
                         td=levelToRole[v]
+                        td=user.space.permissions[k] ? 'yes' : 'no'
                 
         if user.space.permissions.view_members
             h3 Members [#{people.length}]

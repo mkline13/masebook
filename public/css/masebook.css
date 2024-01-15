@@ -165,7 +165,7 @@ span.field-label.block {
     padding-left: 1rem;
 }
 
-#permissions-table td:nth-child(2) {
+#permissions-table td:not(:first-child) {
     text-align: center;
     font-size: smaller;
 }
