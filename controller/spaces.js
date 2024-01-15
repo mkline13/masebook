@@ -8,8 +8,6 @@ const router = express.Router();
 export default router;
 
 
-
-
 async function getSpaceInfo(req, res, next) {
     const user = res.locals.user;
     const space_shortname = req.params.space_id; //TODO: sanitize
