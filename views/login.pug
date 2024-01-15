@@ -12,12 +12,14 @@ html
             form#login-form(method="post" action="/login")
                 fieldset
                     legend Login
-                    .form-item.block
-                        label(for="email") Email
-                        input#email(type="email" name="email")
-                    .form-item.block
-                        label(for="password") Password
-                        input#password(type="password" name="password")
+                    .form-item
+                        label(for='email')
+                            span.field-label.block Email
+                            input#email(type='email', name='email')
+                    .form-item
+                        label(for='password')
+                            span.field-label.block Password
+                            input#password(type='password', name='password')
                     input.form-item(type='submit' value='go')
             script.
                 const form = document.getElementById("login-form");
