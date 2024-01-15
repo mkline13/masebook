@@ -78,8 +78,7 @@ block content
                     space.settings[k.substring(2)] = v;
                 }
                 else if (k.startsWith('p_')) {
-                    const value = parseInt(v);
-                    space.permissions[k.substring(2)] = value === 0 ? null : value;
+                    space.permissions[k.substring(2)] = parseInt(v);
                 }
                 else {
                     space[k] = v;

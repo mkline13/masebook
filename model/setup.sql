@@ -32,6 +32,7 @@ CREATE TABLE roles (
 );
 
 INSERT INTO roles(level, name) VALUES
+    (0, 'none'),
     (1, 'member'),
     (2, 'mod'),
     (3, 'admin'),
@@ -59,13 +60,13 @@ CREATE TABLE spaces (
      *     - each permission contains the minimum credential required to perform an action
      *     - NULL implies that no credential is required to perform an action
      */
-    p_view_members      INTEGER             REFERENCES roles DEFAULT 1,
-    p_view_posts        INTEGER             REFERENCES roles DEFAULT 1,
-    p_create_posts      INTEGER             REFERENCES roles DEFAULT 1,
-    p_delete_posts      INTEGER             REFERENCES roles DEFAULT 2,
-    p_view_comments     INTEGER             REFERENCES roles DEFAULT 1,
-    p_create_comments   INTEGER             REFERENCES roles DEFAULT 1,
-    p_delete_comments   INTEGER             REFERENCES roles DEFAULT 2
+    p_view_members      INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    p_view_posts        INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    p_create_posts      INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    p_delete_posts      INTEGER             NOT NULL REFERENCES roles DEFAULT 2,
+    p_view_comments     INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    p_create_comments   INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    p_delete_comments   INTEGER             NOT NULL REFERENCES roles DEFAULT 2
 );
 
 /*
