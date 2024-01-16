@@ -9,8 +9,9 @@ block content
     if space.settings.description
         p #{space.settings.description} &nbsp;
 
-    button.link-style(onclick="toggleInfo()") info
-    #info.hidden
+    button.link-style(onclick="show('members')") members
+    button.link-style(onclick="show('permissions')") permissions
+    #permissions.hidden
         h3 Permissions
         p Your role: #{levelToRole[user.space.role]}
         table#permissions-table
@@ -26,7 +27,8 @@ block content
                         td=levelToRole[v]
                         td=user.space.permissions[k] ? 'yes' : 'no'
                 
-        if user.space.permissions.view_members
+    if user.space.permissions.view_members
+        #members.hidden
             h3 Members [#{people.length}]
             ul
                 each person in people
@@ -35,9 +37,22 @@ block content
                         if person.role != 1
                             span.role [#{levelToRole[person.role]}]
     script.
-        const info = document.getElementById('info');
-        function toggleInfo() {
-            info.classList.toggle('hidden');
+        let previous = null;
+        
+        function show(id) {
+            const current = document.getElementById(id);
+            current.classList.toggle('hidden');
+
+            if (previous === null) {
+                previous = current;
+            }
+            else if (previous === current) {
+                previous = null;
+            }
+            else {
+                previous.classList.toggle('hidden');
+                previous = current;
+            }            
         }
     
     if user.space.permissions.view_posts || user.space.permissions.create_posts
