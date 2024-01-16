@@ -9,7 +9,9 @@ block content
     if space.settings.description
         p #{space.settings.description} &nbsp;
 
-    button.link-style(onclick="show('members')") members
+    if user.space.permissions.view_members
+        button.link-style(onclick="show('members')") members
+    
     button.link-style(onclick="show('permissions')") permissions
     #permissions.hidden
         h3 Permissions [#{levelToRole[user.space.role]}]

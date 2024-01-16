@@ -2,10 +2,36 @@ import express from 'express';
 import { body, checkExact, matchedData, validationResult } from 'express-validator';
 
 import { buildInsertQuery } from '../helpers/query_builders.js';
-import { levelToRole, foldSpace, flattenSpace } from '../public/js/masebook.js';
+import { shortnameRegexPattern, levelToRole, foldSpace, flattenSpace } from '../public/js/masebook.js';
 
 const router = express.Router();
 export default router;
+
+
+function check (value, callback, errorMsg) {
+    if (!callback(value)) {
+        throw new Error(errorMsg);
+    }
+}
+
+
+function validateSpace (space) {
+    try {
+        check(space.shortname, (v) => typeof(v) === "string", "invalid shortname");
+        check(space.permissions, (v) => typeof(v) === "object", "invalid permissions");
+        check(space.settings, (v) => typeof(v) === "object", "invalid permissions");
+
+
+        check(space.shortname, (v) => shortnameRegexPattern.test(v), "invalid shortname");
+
+    }
+    catch (e) {
+        // TODO: log?
+        console.error("Space validation failed.", e)
+        return false;
+    }
+    return true;
+}
 
 
 async function getSpaceInfo(req, res, next) {
@@ -70,9 +96,15 @@ router.route('/')
         async (req, res) => {
             // creates a new space
             const space = req.body;
-            space.creator_id = req.session.user.id;
 
-            // TODO: validate fields
+            // validate/sanitize fields
+            if (!validateSpace(space)) {
+                res.status(400).send("invalid form submission")
+                return;
+            }
+
+            // Get creator id from session
+            space.creator_id = req.session.user.id;
 
             // insert into db
             const flattened = flattenSpace(space);
