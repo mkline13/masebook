@@ -12,8 +12,7 @@ block content
     button.link-style(onclick="show('members')") members
     button.link-style(onclick="show('permissions')") permissions
     #permissions.hidden
-        h3 Permissions
-        p Your role: #{levelToRole[user.space.role]}
+        h3 Permissions [#{levelToRole[user.space.role]}]
         table#permissions-table
             thead
                 tr
@@ -38,7 +37,7 @@ block content
                             span.role [#{levelToRole[person.role]}]
     script.
         let previous = null;
-        
+
         function show(id) {
             const current = document.getElementById(id);
             current.classList.toggle('hidden');
