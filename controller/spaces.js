@@ -16,6 +16,7 @@ function check (value, callback, errorMsg) {
 
 
 function validateSpace (space) {
+    // TODO: finish!
     try {
         check(space.shortname, (v) => typeof(v) === "string", "invalid shortname");
         check(space.permissions, (v) => typeof(v) === "object", "invalid permissions");
@@ -99,7 +100,7 @@ router.route('/')
 
             // validate/sanitize fields
             if (!validateSpace(space)) {
-                res.status(400).send("invalid form submission")
+                res.status(422).json({ status: "field validation failure", problems: ["more specifics here"] });
                 return;
             }
 
@@ -109,9 +110,24 @@ router.route('/')
             // insert into db
             const flattened = flattenSpace(space);
             const query = buildInsertQuery('spaces', flattened);
-            const result = await req.db.query(query);
 
-            res.redirect('/directory');
+            try {
+                const result = await req.db.query(query);
+            }
+            catch (err) {
+                if (err.code === '23505' && err.constraint === 'spaces_shortname_key') {
+                    // When the chosen shortname is not unique
+                    res.status(422).send({ status: "invalid form submission", problems: ["shortname already taken"] });
+                    return;
+                }
+                else {
+                    // TODO: should probably log these situations (?)
+                    res.status(500).send({ status: "form submission error", problems: ["unknown problem"] });
+                    return;
+                }
+            }
+
+            res.status(201).json({ shortname: space.shortname });
         }
     );
 

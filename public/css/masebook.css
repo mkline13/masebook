@@ -170,6 +170,18 @@ span.field-label.block {
     font-size: smaller;
 }
 
+#status {
+    margin-left: 0.5rem;
+}
+
+#status.success {
+    color: green;
+}
+
+#status.failure {
+    color: red;
+}
+
 /* === POSTS === */
 article.post {
     display: grid;

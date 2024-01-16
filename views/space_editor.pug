@@ -58,13 +58,19 @@ block content
             +permission('p_create_comments', 'view comments', 1)
             +permission('p_delete_comments', 'view comments', 2)
         
-        input.form-item(type='submit', value='submit')
+        .form-item
+            label(for='submit')
+                input#submit(type='submit', value='submit')
+                span#status.field-label
     script(type='module').
         import { foldSpace } from '/public/js/masebook.js';
 
         const form = document.getElementById('space-editor');
+        const submitButton = document.getElementById('submit');
+        const status = document.getElementById('status');
         form.addEventListener('submit', async event => {
             event.preventDefault();
+            submitButton.disabled = true;
             const data = new FormData(form);
 
             // Format data for use by backend
@@ -97,10 +103,22 @@ block content
                 }
                 
                 fetch('/s', fetchOptions)
-                    .then(res => {
-                        if (res.redirected) {
-                            window.location.href = res.url;
+                    .then(async res => {
+                        if (res.ok) {
+                            return res.json();
                         }
+                        throw new Error(await res.text())
+                    })
+                    .then(data => {
+                        status.classList.add('success');
+                        status.textContent = "success!";
+                        setTimeout(() => window.location.href = '/s/' + data.shortname, 500);
+                    })
+                    .catch(err => {
+                        status.classList.add('failure');
+                        submitButton.disabled = false;
+                        const details = JSON.parse(err.message);
+                        status.textContent = `ERROR: ${details.status} -- ${details.problems.join('; ')}`;
                     });
             }
             catch (err) {
