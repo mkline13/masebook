@@ -30,7 +30,8 @@ block content
     form#space-editor
         +textField(
             's_title',
-            'Title'
+            'Title',
+            'Must be unique.'
         )(minlength=1, maxlength=64, required)
         +textField(
             's_description',
@@ -111,6 +112,7 @@ block content
                     })
                     .then(data => {
                         status.classList.add('success');
+                        status.classList.remove('failure');
                         status.textContent = "success!";
                         setTimeout(() => window.location.href = '/s/' + data.shortname, 500);
                     })
@@ -118,7 +120,7 @@ block content
                         status.classList.add('failure');
                         submitButton.disabled = false;
                         const details = JSON.parse(err.message);
-                        status.textContent = `ERROR: ${details.status} -- ${details.problems.join('; ')}`;
+                        status.textContent = `ERROR: ${details.msg}`;
                     });
             }
             catch (err) {

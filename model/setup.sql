@@ -49,7 +49,7 @@ CREATE TABLE spaces (
     shortname           shortname_t         UNIQUE NOT NULL,
 
     /* SETTINGS prefixed with 's_' for easier processing by JS */
-    s_title             VARCHAR(64)         NOT NULL,                -- title of the space as seen by users on the space page and in the directory
+    s_title             VARCHAR(64)         UNIQUE NOT NULL,                -- title of the space as seen by users on the space page and in the directory
     s_description       VARCHAR             DEFAULT '',              -- description of the space to be seen by users, hopefully will be part of the space search function in the future
     s_public            BOOLEAN             NOT NULL DEFAULT false,  -- whether or not the space can be seen by non-members
     s_show_in_dir       BOOLEAN             NOT NULL DEFAULT true,   -- if the space is public, determines if it can be seen in the directory by non-members

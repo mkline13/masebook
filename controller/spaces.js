@@ -1,39 +1,10 @@
 import express from 'express';
-import { body, checkExact, matchedData, validationResult } from 'express-validator';
-
 import { buildInsertQuery } from '../helpers/query_builders.js';
-import { shortnameRegexPattern, levelToRole, foldSpace, flattenSpace } from '../public/js/masebook.js';
+import { foldSpace, flattenSpace } from '../public/js/masebook.js';
+import { validateNewSpaceForm } from '../helpers/validation.js';
 
 const router = express.Router();
 export default router;
-
-
-function check (value, callback, errorMsg) {
-    if (!callback(value)) {
-        throw new Error(errorMsg);
-    }
-}
-
-
-function validateSpace (space) {
-    // TODO: finish!
-    try {
-        check(space.shortname, (v) => typeof(v) === "string", "invalid shortname");
-        check(space.permissions, (v) => typeof(v) === "object", "invalid permissions");
-        check(space.settings, (v) => typeof(v) === "object", "invalid permissions");
-
-
-        check(space.shortname, (v) => shortnameRegexPattern.test(v), "invalid shortname");
-
-    }
-    catch (e) {
-        // TODO: log?
-        console.error("Space validation failed.", e)
-        return false;
-    }
-    return true;
-}
-
 
 async function getSpaceInfo(req, res, next) {
     const user = res.locals.user;
@@ -99,8 +70,9 @@ router.route('/')
             const space = req.body;
 
             // validate/sanitize fields
-            if (!validateSpace(space)) {
-                res.status(422).json({ status: "field validation failure", problems: ["more specifics here"] });
+            const valid = validateNewSpaceForm(space);
+            if (!valid) {
+                res.status(422).json({ msg: "form validation failure" });
                 return;
             }
 
@@ -115,14 +87,24 @@ router.route('/')
                 const result = await req.db.query(query);
             }
             catch (err) {
-                if (err.code === '23505' && err.constraint === 'spaces_shortname_key') {
-                    // When the chosen shortname is not unique
-                    res.status(422).send({ status: "invalid form submission", problems: ["shortname already taken"] });
+                if (err.code === '23505') {
+                    // When the chosen shortname or title is not unique
+                    let msg;
+                    if (err.constraint === 'spaces_shortname_key') {
+                        msg = "shortname already taken";
+                    }
+                    else if (err.constraint === 'spaces_s_title_key'){
+                        msg = "title already taken";
+                    }
+                    else {
+                        debugger;
+                    }
+                    res.status(422).send({msg});
                     return;
                 }
                 else {
-                    // TODO: should probably log these situations (?)
-                    res.status(500).send({ status: "form submission error", problems: ["unknown problem"] });
+                    console.error(err);
+                    res.status(500).send({ msg: "unknown error" });
                     return;
                 }
             }
