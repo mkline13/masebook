@@ -14,7 +14,6 @@ const newSpaceFormSchema = {
     type: 'object',
     properties: {
         shortname: shortnameSchema,
-        creator_id: {type: 'integer', minimum: 1},
         settings: {
             type: 'object',
             properties: {
@@ -47,3 +46,4 @@ const newSpaceFormSchema = {
 
 // VALIDATORS
 export const validateNewSpaceForm = ajv.compile(newSpaceFormSchema);
+export const validateShortname = ajv.compile(shortnameSchema);

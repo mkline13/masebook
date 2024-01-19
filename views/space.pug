@@ -64,10 +64,9 @@ block content
             button.link-style#post_editor_button(onclick="togglePostEditor()") create post
             form#new_post_form.hidden(method='post')
                 label(for='post') Posting as '#{user.shortname}'...
-                .post-text-padding
                     textarea.post-text(name='post', wrap='hard', oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
-                input(type='submit' value='post') 
-                input(type='reset', onclick="togglePostEditor()", value='cancel')
+                    input(type='submit' value='post') 
+                    input(type='reset', onclick="togglePostEditor()", value='cancel')
 
         script.
             const postEditor = document.getElementById('new_post_form');
@@ -76,6 +75,54 @@ block content
                 postEditor.classList.toggle('hidden');
                 postEditorButton.classList.toggle('hidden');
             }
+
+            async function post(url, obj) {
+                const options = {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json"
+                    },
+                    body: JSON.stringify(obj),
+                }
+
+                const res = await fetch(url, options);
+                return await res.json();
+            }
+
+            postEditor.addEventListener('submit', async event => {
+                event.preventDefault();
+                const data = new FormData(postEditor);
+                const post = data.get('post');
+
+                try {
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json"
+                        },
+                        body: JSON.stringify({post}),
+                    }
+                    
+                    fetch(window.location.href, options)
+                        .then(async res => {
+                            if (res.ok) {
+                                window.location.reload();
+                            }
+                            else {
+                                throw new Error(await res.text())
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                }
+                catch (error) {
+                    console.log(error.message);
+                }
+            });
+            
     
     if user.space.permissions.view_posts
         if posts.length > 0

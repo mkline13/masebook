@@ -1,7 +1,8 @@
 import express from 'express';
 import { buildInsertQuery } from '../helpers/query_builders.js';
 import { foldSpace, flattenSpace } from '../public/js/masebook.js';
-import { validateNewSpaceForm } from '../helpers/validation.js';
+import { validateNewSpaceForm, validateShortname } from '../helpers/validation.js';
+import { flatten, expand } from '../helpers/transformers.js';
 
 const router = express.Router();
 export default router;
@@ -10,34 +11,44 @@ async function getSpaceInfo(req, res, next) {
     const user = res.locals.user;
     const space_shortname = req.params.space_id; //TODO: sanitize
 
+    if (!validateShortname(req.params.space_id)) {
+        res.status(400).send("invalid parameter");
+        return;
+    }
+
     user.space = {};
 
     // get space info
-    let space;
-
-    {
-        const query = {
-            text:  `SELECT
-                        s.*,
-                        COALESCE(m.user_role, 0) AS user_role
-                    FROM
-                        spaces s
-                        FULL OUTER JOIN memberships m ON m.space_id=s.id AND m.user_id=$1
-                        WHERE s.shortname=$2 AND s.space_status='active';
-                    `,
-            values: [user.id, space_shortname],
-        }
-        const result = await req.db.query(query);
-        const data = result.rows[0];
-
-        if (data === undefined) {
-            next();
-            return;
-        }
-
-        // format data correctly
-        space = foldSpace(data);
+    const query = {
+        text:  `SELECT
+                    s.*,
+                    COALESCE(m.user_role, 0) AS user_role
+                FROM
+                    spaces s
+                    FULL OUTER JOIN memberships m ON m.space_id=s.id AND m.user_id=$1
+                    WHERE s.shortname=$2 AND s.space_status='active';
+                `,
+        values: [user.id, space_shortname],
     }
+
+    let result;
+    try {
+        result = await req.db.query(query);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send("server error");
+        return;
+    }
+
+    const data = result.rows[0];
+    if (data === undefined) {
+        next();
+        return;
+    }
+
+    // format data correctly
+    const space = expand(data);
 
     // put membership info into user object for tidiness
     user.space.role = space.user_role;
@@ -80,7 +91,7 @@ router.route('/')
             space.creator_id = req.session.user.id;
 
             // insert into db
-            const flattened = flattenSpace(space);
+            const flattened = flatten(space);
             const query = buildInsertQuery('spaces', flattened);
 
             try {
@@ -139,7 +150,16 @@ router.route('/:space_id')
                             ORDER BY m.user_role DESC, u.shortname ASC;`,
                 values: [space.id]
             }
-            const result = await req.db.query(query);
+
+            let result;
+            try {
+                result = await req.db.query(query);
+            }
+            catch (error) {
+                console.error(error);
+                res.status(500).send('server error');
+                return;
+            }
             res.locals.people = result.rows;
         }
 
@@ -157,7 +177,15 @@ router.route('/:space_id')
                             ORDER BY p.id DESC;`,
                 values: [space.id]
             }
-            const result = await req.db.query(query);
+            let result;
+            try {
+                result = await req.db.query(query);
+            }
+            catch (error) {
+                console.error(error);
+                res.status(500).send('server error');
+                return;
+            }
             res.locals.posts = result.rows;
         }
 
@@ -187,8 +215,16 @@ router.route('/:space_id')
         }
 
         const sql = "INSERT INTO posts(space_id, author_id, contents) VALUES ($1, $2, $3) RETURNING *;";
-        const result = await req.db.query(sql, [space.id, user.id, post_text]);
-        //TODO: error handling
 
-        res.redirect('back');
+        let result;
+        try {
+            result = await req.db.query(sql, [space.id, user.id, post_text]);
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).send('server error');
+            return;
+        }
+
+        res.status(201).send('OK');
     });

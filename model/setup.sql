@@ -48,25 +48,24 @@ CREATE TABLE spaces (
     creator_id          INTEGER             NOT NULL REFERENCES users,
     shortname           shortname_t         UNIQUE NOT NULL,
 
-    /* SETTINGS prefixed with 's_' for easier processing by JS */
-    s_title             VARCHAR(64)         UNIQUE NOT NULL,                -- title of the space as seen by users on the space page and in the directory
-    s_description       VARCHAR             DEFAULT '',              -- description of the space to be seen by users, hopefully will be part of the space search function in the future
-    s_public            BOOLEAN             NOT NULL DEFAULT false,  -- whether or not the space can be seen by non-members
-    s_show_in_dir       BOOLEAN             NOT NULL DEFAULT true,   -- if the space is public, determines if it can be seen in the directory by non-members
+    /* SETTINGS */
+    "settings.title"            VARCHAR(64)         UNIQUE NOT NULL,         -- title of the space as seen by users on the space page and in the directory
+    "settings.description"      VARCHAR             DEFAULT '',              -- description of the space to be seen by users, hopefully will be part of the space search function in the future
+    "settings.public"           BOOLEAN             NOT NULL DEFAULT false,  -- whether or not the space can be seen by non-members
+    "settings.show_in_dir"      BOOLEAN             NOT NULL DEFAULT true,   -- if the space is public, determines if it can be seen in the directory by non-members
     
     /*
      * PERMISSIONS
-     *     - prefixed with 'p_'
      *     - each permission contains the minimum credential required to perform an action
      *     - NULL implies that no credential is required to perform an action
      */
-    p_view_members      INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
-    p_view_posts        INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
-    p_create_posts      INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
-    p_delete_posts      INTEGER             NOT NULL REFERENCES roles DEFAULT 2,
-    p_view_comments     INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
-    p_create_comments   INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
-    p_delete_comments   INTEGER             NOT NULL REFERENCES roles DEFAULT 2
+    "permissions.view_members"      INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    "permissions.view_posts"        INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    "permissions.create_posts"      INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    "permissions.delete_posts"      INTEGER             NOT NULL REFERENCES roles DEFAULT 2,
+    "permissions.view_comments"     INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    "permissions.create_comments"   INTEGER             NOT NULL REFERENCES roles DEFAULT 1,
+    "permissions.delete_comments"   INTEGER             NOT NULL REFERENCES roles DEFAULT 2
 );
 
 /*

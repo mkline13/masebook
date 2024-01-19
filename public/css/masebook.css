@@ -42,10 +42,6 @@ main {
     grid-gap: 0;
 }
 
-/* .grid-item {
-    background-color: rgb(237, 237, 237);
-} */
-
 .grid-container > #header {
     grid-area: header;
 }
@@ -84,11 +80,6 @@ textarea {
 
 textarea.post-text {
     width: 100%;
-}
-
-.post-text-padding {
-    padding-top: 1em;
-    padding-bottom: 1em;
 }
 
 /* FORM STYLING */

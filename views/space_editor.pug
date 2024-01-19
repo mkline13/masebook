@@ -1,29 +1,9 @@
-extends masebook.pug
+extends masebook
+include form-mixins
 
 block title
     - const titleText = space ? `Edit Space | ${space.name}` : 'New Space'
     title= titleText
-
-mixin textField(id, label, hint)
-    .form-item
-        label(for=id)
-            span.field-label.block=label
-                if attributes.required
-                    <span aria-label="required">*</span>
-            if hint
-                span.field-hint=hint 
-            input(type='text', id=id, name=id)&attributes(attributes)
-
-mixin checkBox(id, label, checked)
-    .form-item
-        label(for=id)
-            input(id=id, type='checkbox', name=id, checked=checked, value='true')
-            span.field-label=label
-
-mixin permission(id, label, default_role)
-    span.field-label=label
-    - for (let i=0; i<levelToRole.length; i++)
-        input(type='radio', name=id, value=i, checked=(i === default_role))
 
 block content
     h1= titleText

@@ -8,7 +8,7 @@ INSERT INTO users(shortname, email, password, account_type, s_show_in_dir, s_pro
 
 /* spaces */
 -- The goal here is to make mkline13@gmail.com the tester account and to build spaces with various permissions to verify they work
-INSERT INTO spaces(creator_id, shortname, s_title, s_description, s_public, s_show_in_dir) VALUES
+INSERT INTO spaces(creator_id, shortname, "settings.title", "settings.description", "settings.public", "settings.show_in_dir") VALUES
     (email_to_user('mason@gmail.com'), 'space1', 'Space-1', 'The First Space', DEFAULT, DEFAULT),
     (email_to_user('mason@mason.mason'), 'space2', 'Space-2', 'Second of Spaces', true, true),
     (email_to_user('mason@mason.mason'), 'space3', 'Space-3', 'Third Guy', true, false),

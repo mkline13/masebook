@@ -30,15 +30,15 @@ router.route('/')
             const query = {
                 name: "get_spaces_for_directory",
                 text:  `SELECT
-                            s.id, s.shortname, s.s_title AS title, m.user_role AS role
+                            s.id, s.shortname, s."settings.title" AS title, m.user_role AS role
                         FROM
                             spaces s
                             LEFT JOIN memberships m
                                 ON m.space_id=s.id AND m.user_id=$1
                             WHERE m.user_role IS NOT NULL
-                                OR s.s_public=true
-                                AND s.s_show_in_dir=true
-                            ORDER BY m.user_role DESC NULLS LAST, s.s_title ASC;`,
+                                OR s."settings.public"=true
+                                AND s."settings.show_in_dir"=true
+                            ORDER BY m.user_role DESC NULLS LAST, s."settings.title" ASC;`,
                 values: [req.session.user.id]
             };
             const result = await req.db.query(query);

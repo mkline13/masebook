@@ -1,0 +1,22 @@
+
+mixin textField(id, label, hint)
+    .form-item
+        label(for=id)
+            span.field-label.block=label
+                if attributes.required
+                    <span aria-label="required">*</span>
+            if hint
+                span.field-hint=hint 
+            input(type='text', id=id, name=id)&attributes(attributes)
+            span.field-feedback(id=id+'_feedback')
+
+mixin checkBox(id, label, checked)
+    .form-item
+        label(for=id)
+            input(id=id, type='checkbox', name=id, checked=checked, value='true')
+            span.field-label=label
+
+mixin permission(id, label, default_role)
+    span.field-label(id=labelId)=label
+    - for (let i=0; i<levelToRole.length; i++)
+        input(type='radio', name=id, value=i, checked=(i === default_role))
