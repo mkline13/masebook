@@ -1,5 +1,6 @@
 import express from 'express';
 import { levelToRole } from '../public/js/masebook.js';
+import { expand } from '../helpers/transformers.js';
 
 const router = express.Router();
 export default router;
@@ -13,18 +14,18 @@ router.route('/')
                 name: "get_users_for_directory",
                 text:  `SELECT
                             id,
-                            shortname AS name,
+                            shortname,
                             account_type
                         FROM
                             users
                             WHERE account_status='active'
-                            AND s_show_in_dir=true
+                            AND "settings.show_in_dir"=true
                             OR id=$1
                             ORDER BY account_type DESC, shortname;`,
                 values: [req.session.user.id]  // to ensure current user is shown
             }
             const result = await req.db.query(query);
-            res.locals.users = result.rows;
+            res.locals.users = expand(result.rows);
         }
         {
             const query = {

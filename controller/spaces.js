@@ -141,7 +141,7 @@ router.route('/:space_id')
                 text:  `SELECT
                             m.user_id AS id,
                             m.user_role AS role,
-                            u.shortname AS name
+                            u.shortname
                         FROM
                             memberships m
                             JOIN users u ON m.user_id=u.id

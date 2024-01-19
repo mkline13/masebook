@@ -34,7 +34,7 @@ block content
             ul
                 each person in people
                     li
-                        a(href="/u/" + person.id) #{person.name}
+                        +user-link(person)
                         if person.role != 1
                             span.role [#{levelToRole[person.role]}]
     script.

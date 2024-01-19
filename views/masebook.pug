@@ -1,3 +1,12 @@
+
+
+mixin user-link(u)
+    a(href="/u/" + u.shortname)= u.shortname
+
+mixin space-link(s)
+    a(href="/s/" + s.shortname)= s.title
+
+
 mixin text2paragraphs(text)
     - const paragraphs = text.split(/\r?\n/);
     each para in paragraphs

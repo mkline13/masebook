@@ -1,6 +1,6 @@
 /* user */
 -- NOTE: password is hash of 'b0bb0'
-INSERT INTO users(shortname, email, password, account_type, s_show_in_dir, s_profile_desc) VALUES
+INSERT INTO users(shortname, email, password, account_type, "settings.show_in_dir", "settings.profile_desc") VALUES
     ('mason_k', 'mason@gmail.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'administrator', true, 'itsa meee'),
     ('mmm', 'mason@mason.mason', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'user', true, 'itsa also me'),
     ('basin', 'basin@basin.com', '$2a$08$1lCvpuZe5PyJ8HQIqivj8.S45c9POZqG3uLMp7OkoQTZbpwuehtfW', 'user', DEFAULT, DEFAULT),

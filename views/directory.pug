@@ -5,13 +5,13 @@ block title
 
 mixin user(u)
     li
-        a(href="/u/" + u.id)= u.name
+        +user-link(u)
         if u.account_type === "administrator"
             span.role [server administrator]
 
 mixin space(s)
     li
-        a(href="/s/" + s.shortname)= s.title
+        +space-link(s)
         if s.role !== 'none'
             span.role [#{s.role}]
 
