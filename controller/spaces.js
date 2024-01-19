@@ -1,6 +1,5 @@
 import express from 'express';
 import { buildInsertQuery } from '../helpers/query_builders.js';
-import { foldSpace, flattenSpace } from '../public/js/masebook.js';
 import { validateNewSpaceForm, validateShortname } from '../helpers/validation.js';
 import { flatten, expand } from '../helpers/transformers.js';
 

@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { foldUser } from '../public/js/masebook.js';
+import { expand } from '../helpers/transformers.js';
 
 export async function login_controller(req, res) {
     // TODO: VALIDATE INPUTS
@@ -21,7 +21,7 @@ export async function login_controller(req, res) {
             req.session.regenerate(function (err) {
                 if (err) next(err);
 
-                req.session.user = foldUser(server_user);
+                req.session.user = expand(server_user);
 
                 req.session.save(function (err) {
                     if (err) return next(err);

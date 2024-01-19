@@ -17,8 +17,8 @@ CREATE TABLE users (
     password        bcrypt_hash_t       NOT NULL,
 
     /* SETTINGS prefixed with 's_' for easier processing by JS */
-    s_show_in_dir     BOOLEAN             NOT NULL DEFAULT false,
-    s_profile_desc    VARCHAR             DEFAULT ''
+    "settings.show_in_dir"     BOOLEAN             NOT NULL DEFAULT false,
+    "settings.profile_desc"    VARCHAR             DEFAULT ''
 );
 
 /*

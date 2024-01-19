@@ -9,12 +9,12 @@ block content
     h1= titleText
     form#space-editor
         +textField(
-            's_title',
+            'settings.title',
             'Title',
             'Must be unique.'
         )(minlength=1, maxlength=64, required)
         +textField(
-            's_description',
+            'settings.description',
             'Description'
         )
         +textField(
@@ -23,28 +23,28 @@ block content
             'A unique identifier for this space that will be used in its URL. Can only contain alphanumeric characters and underscores. Must start with a character from the alphabet.'
         )(minlength=3, maxlength=32, required, pattern='^[a-z][a-z0-9_]{2,31}$')
 
-        +checkBox('s_public', 'Public (visible to non-members)', false)
-        +checkBox('s_show_in_dir', 'Show in Server Directory', true)
+        +checkBox('settings.public', 'Public (visible to non-members)', false)
+        +checkBox('settings.show_in_dir', 'Show in Server Directory', true)
         
         fieldset.form-item#permissions-editor
             legend Permissions
             span.permissions-col-header='role required to...'
             each role in levelToRole
                 span.permissions-col-header=role
-            +permission('p_view_members', 'view members', 1)
-            +permission('p_view_posts', 'view posts', 1)
-            +permission('p_create_posts', 'create posts', 1)
-            +permission('p_delete_posts', 'delete posts', 2)
-            +permission('p_view_comments', 'view comments', 1)
-            +permission('p_create_comments', 'view comments', 1)
-            +permission('p_delete_comments', 'view comments', 2)
+            +permission('permissions.view_members', 'view members', 1)
+            +permission('permissions.view_posts', 'view posts', 1)
+            +permission('permissions.create_posts', 'create posts', 1)
+            +permission('permissions.delete_posts', 'delete posts', 2)
+            +permission('permissions.view_comments', 'view comments', 1)
+            +permission('permissions.create_comments', 'view comments', 1)
+            +permission('permissions.delete_comments', 'view comments', 2)
         
         .form-item
             label(for='submit')
                 input#submit(type='submit', value='submit')
                 span#status.field-label
     script(type='module').
-        import { foldSpace } from '/public/js/masebook.js';
+        import { expand } from '/public/js/masebook.js';
 
         const form = document.getElementById('space-editor');
         const submitButton = document.getElementById('submit');
@@ -52,25 +52,10 @@ block content
         form.addEventListener('submit', async event => {
             event.preventDefault();
             submitButton.disabled = true;
-            const data = new FormData(form);
+            const data = Object.fromEntries((new FormData(form)).entries());
 
             // Format data for use by backend
-            const space = {
-                settings: {},
-                permissions: {}
-            }
-
-            for (const [k,v] of data.entries()) {
-                if (k.startsWith('s_')) {
-                    space.settings[k.substring(2)] = v;
-                }
-                else if (k.startsWith('p_')) {
-                    space.permissions[k.substring(2)] = parseInt(v);
-                }
-                else {
-                    space[k] = v;
-                }
-            }
+            const space = expand(data);
 
             // Send data to server
             try {
