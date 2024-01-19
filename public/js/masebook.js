@@ -1,5 +1,5 @@
 // UNIQUE IDENTIFIERS
-export const shortnameRegexPattern = /^[a-z][a-z0-9_]{2,31}$/;
+export const shortnameRegexPattern = /^[a-z][a-z0-9_-]{2,31}$/;
 /*
  * Masebook shortnames must have the following characteristics:
  *   - must be between 3 and 32 characters long

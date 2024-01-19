@@ -9,12 +9,12 @@ INSERT INTO users(shortname, email, password, account_type, "settings.show_in_di
 /* spaces */
 -- The goal here is to make mkline13@gmail.com the tester account and to build spaces with various permissions to verify they work
 INSERT INTO spaces(creator_id, shortname, "settings.title", "settings.description", "settings.public", "settings.show_in_dir") VALUES
-    (email_to_user('mason@gmail.com'), 'space1', 'Space-1', 'The First Space', DEFAULT, DEFAULT),
-    (email_to_user('mason@mason.mason'), 'space2', 'Space-2', 'Second of Spaces', true, true),
-    (email_to_user('mason@mason.mason'), 'space3', 'Space-3', 'Third Guy', true, false),
-    (email_to_user('mason@mason.mason'), 'space4', 'Space-4', 'Froth', false, true),
-    (email_to_user('mason@mason.mason'), 'space5', 'Space-5', 'Fiff', false, false),
-    (email_to_user('mason@mason.mason'), 'space6', 'Space-6', 'Sixth Space', false, false);
+    (email_to_user('mason@gmail.com'), 'space-1', 'Space-1', 'The First Space', DEFAULT, DEFAULT),
+    (email_to_user('mason@mason.mason'), 'space-2', 'Space-2', 'Second of Spaces', true, true),
+    (email_to_user('mason@mason.mason'), 'space-3', 'Space-3', 'Third Guy', true, false),
+    (email_to_user('mason@mason.mason'), 'space-4', 'Space-4', 'Froth', false, true),
+    (email_to_user('mason@mason.mason'), 'space-5', 'Space-5', 'Fiff', false, false),
+    (email_to_user('mason@mason.mason'), 'space-6', 'Space-6', 'Sixth Space', false, false);
 
 INSERT INTO memberships(user_id, space_id, user_role) VALUES
     (email_to_user('mason@gmail.com'), 5, 1),

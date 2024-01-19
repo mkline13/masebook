@@ -21,7 +21,7 @@ block content
             'shortname',
             'shortname',
             'A unique identifier for this space that will be used in its URL. Can only contain alphanumeric characters and underscores. Must start with a character from the alphabet.'
-        )(minlength=3, maxlength=32, required, pattern='^[a-z][a-z0-9_]{2,31}$')
+        )(minlength=3, maxlength=32, required, pattern='^[a-z][a-z0-9_-]{2,31}$')
 
         +checkBox('settings.public', 'Public (visible to non-members)', false)
         +checkBox('settings.show_in_dir', 'Show in Server Directory', true)
