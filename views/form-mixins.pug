@@ -8,7 +8,7 @@ mixin textField(id, label, hint)
             if hint
                 span.field-hint=hint 
             input(type='text', id=id, name=id)&attributes(attributes)
-            span.field-feedback(id=id+'_feedback')
+            span.field-issue(id=id+'_issue')
 
 mixin checkBox(id, label, checked)
     .form-item

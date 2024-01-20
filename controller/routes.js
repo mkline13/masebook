@@ -43,7 +43,7 @@ export default function routes(app) {
     app.get("/login", (req, res) => {
         // redirect to home page if logged in
         if (req.session.user) {
-            return res.redirect('/');
+            return res.status(303).redirect('/');
         }
         res.render('login');
     });

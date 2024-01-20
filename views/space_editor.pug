@@ -7,6 +7,7 @@ block title
 
 block content
     h1= titleText
+    p#status
     form#space-editor
         +textField(
             'settings.title',
@@ -42,7 +43,6 @@ block content
         .form-item
             label(for='submit')
                 input#submit(type='submit', value='submit')
-                span#status.field-label
     script(type='module').
         import { expand } from '/public/js/masebook.js';
 
@@ -61,6 +61,7 @@ block content
             try {
                 const fetchOptions = {
                     method: 'POST',
+                    redirect: 'follow',
                     headers: {
                         "Content-Type": "application/json",
                         Accept: "application/json"
@@ -70,22 +71,27 @@ block content
                 
                 fetch('/s', fetchOptions)
                     .then(async res => {
-                        if (res.ok) {
-                            return res.json();
+                        if (res.redirected) {
+                            window.location.href = res.url;
                         }
-                        throw new Error(await res.text())
-                    })
-                    .then(data => {
-                        status.classList.add('success');
-                        status.classList.remove('failure');
-                        status.textContent = "success!";
-                        setTimeout(() => window.location.href = '/s/' + data.shortname, 500);
+                        else {
+                            const errorText = await res.text();
+                            throw new Error(errorText);
+                        }
                     })
                     .catch(err => {
                         status.classList.add('failure');
                         submitButton.disabled = false;
                         const details = JSON.parse(err.message);
                         status.textContent = `ERROR: ${details.msg}`;
+                        if (details.issues) {
+                            for (const k in details.issues) {
+                                const id = k + '_issue';
+                                const element = document.getElementById(id);
+                                element.textContent = details.issues[k];
+                            }
+                        }
+                        document.getElementById('content').scroll({top: 0, left: 0, behavior: 'smooth'})
                     });
             }
             catch (err) {

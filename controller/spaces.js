@@ -72,7 +72,7 @@ async function getSpaceInfo(req, res, next) {
 /* ROUTES */
 router.route('/')
     .get(async (req, res) => {
-        res.redirect('/directory');
+        res.status(308).redirect('/directory');
     })
     .post(
         async (req, res) => {
@@ -86,6 +86,50 @@ router.route('/')
                 return;
             }
 
+            // check that unique fields are indeed unique
+            {
+                const query = {
+                    text:  `SELECT
+                                BOOL_OR(shortname=$1) AS shortname_exists,
+                                BOOL_OR("settings.title"=$2) AS title_exists
+                            FROM spaces
+                                WHERE shortname=$1
+                                OR "settings.title"=$2;`,
+                    values: [space.shortname, space.settings.title]
+                }
+
+                let shortname_exists, title_exists;
+                try {
+                    const result = await req.db.query(query);
+                    ({shortname_exists, title_exists} = result.rows[0]);
+                }
+                catch (err) {
+                    console.error(err);
+                    res.status(500).send({ msg: "unknown error" });
+                    return;
+                }
+
+                const resObj = {
+                    msg: "Unique values required.",
+                    issues: {}
+                };
+
+                let isError = false;
+                if (shortname_exists) {
+                    resObj.issues['shortname'] = "shortname must be unique, please choose a different one"
+                    isError = true;
+                }
+                if (title_exists) {
+                    resObj.issues['settings.title'] = "title must be unique, please choose a different one"
+                    isError = true;
+                }
+
+                if (isError) {
+                    res.status(422).json(resObj);
+                    return;
+                }
+            }
+
             // Get creator id from session
             space.creator_id = req.session.user.id;
 
@@ -97,29 +141,12 @@ router.route('/')
                 const result = await req.db.query(query);
             }
             catch (err) {
-                if (err.code === '23505') {
-                    // When the chosen shortname or title is not unique
-                    let msg;
-                    if (err.constraint === 'spaces_shortname_key') {
-                        msg = "shortname already taken";
-                    }
-                    else if (err.constraint === 'spaces_s_title_key'){
-                        msg = "title already taken";
-                    }
-                    else {
-                        debugger;
-                    }
-                    res.status(422).send({msg});
-                    return;
-                }
-                else {
-                    console.error(err);
-                    res.status(500).send({ msg: "unknown error" });
-                    return;
-                }
+                console.error(err);
+                res.status(500).send({ msg: "unknown error" });
+                return;
             }
 
-            res.status(201).json({ shortname: space.shortname });
+            res.status(303).redirect('/s/' + space.shortname);
         }
     );
 
