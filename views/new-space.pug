@@ -72,6 +72,10 @@ block content
 
             // UI waiting state
             elements['submit'].disabled = true;
+            const issueSpans = document.querySelectorAll('.field-issue');
+            for (const elem of issueSpans) {
+                elem.textContent = "";
+            }
 
             // Format data for use by backend
             const data = Object.fromEntries((new FormData(form)).entries());
