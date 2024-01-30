@@ -1,5 +1,5 @@
 // UNIQUE IDENTIFIERS
-export const shortnameRegexPattern = /^[a-z][a-z0-9_-]{2,31}$/;
+const shortnameRegexPattern = /^[a-z][a-z0-9_-]{2,31}$/;
 /*
  * Masebook shortnames must have the following characteristics:
  *   - must be between 3 and 32 characters long
@@ -8,10 +8,10 @@ export const shortnameRegexPattern = /^[a-z][a-z0-9_-]{2,31}$/;
  */
 
 // ROLES
-export const levelToRole = ['none', 'member', 'mod', 'admin', 'owner'];
+const levelToRole = ['none', 'member', 'mod', 'admin', 'owner'];
 Object.freeze(levelToRole);
 
-export const roleToLevel = {};  // example: {none: 0 ...}
+const roleToLevel = {};  // example: {none: 0 ...}
 for (let i=0; i<levelToRole.length; i++) {
     roleToLevel[levelToRole[i]] = i;
 }
@@ -20,7 +20,7 @@ Object.freeze(roleToLevel);
 
 
 // Transforming objects
-export function expand(obj) {
+function expand(obj) {
     // the inverse of flatten
     const result = {};
     for (const k in obj) {
@@ -39,3 +39,10 @@ export function expand(obj) {
     }
     return result;
 }
+
+// Handy DOM function for getting elements by ID without using document.getElementById directly
+const elements = new Proxy({}, {
+    get(target, prop) {
+      return document.getElementById(prop) || document.getElementsByName(prop)[0];
+    }
+  });

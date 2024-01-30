@@ -59,5 +59,5 @@ export default function routes(app) {
     // ROUTES
     app.get("/", checkAuth, user_info_to_locals, dashboard);
     app.get("/settings", checkAuth, user_info_to_locals, (_, res) => { res.render('settings'); });  // TODO: build settings page
-    app.get("/new-space", checkAuth, user_info_to_locals, (_, res) => { res.render('space_editor'); })
+    app.get("/new-space", checkAuth, user_info_to_locals, (_, res) => { res.render('new-space'); })
 }

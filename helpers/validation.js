@@ -1,4 +1,3 @@
-import { shortnameRegexPattern } from '../public/js/masebook.js';
 import Ajv from 'ajv';
 import addKeywords from 'ajv-keywords';
 import addFormats from 'ajv-formats';
@@ -9,8 +8,10 @@ addKeywords(ajv, 'transform');
 addFormats(ajv, ['email']);
 
 // SCHEMAS
-const shortnameSchema = {type: 'string', minLength: 3, maxLength: 32, pattern: shortnameRegexPattern.toString().slice(1,-1)};
+const shortnameSchema = {type: 'string', minLength: 3, maxLength: 32, pattern: '^[a-z][a-z0-9_-]{2,31}$'};
+
 const permissionSchema = {type: 'integer', minimum: 0, maximum: 4};
+
 const newSpaceFormSchema = {
     type: 'object',
     properties: {

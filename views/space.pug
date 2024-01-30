@@ -8,6 +8,12 @@ block content
 
     if space.settings.description
         p #{space.settings.description} &nbsp;
+    
+    if user.space.role >= 3
+        button.link-style() edit
+    
+    if user.space.permissions.view_posts
+        button.link-style() follow
 
     if user.space.permissions.view_members
         button.link-style(onclick="show('members')") members

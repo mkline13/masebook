@@ -1,11 +1,33 @@
 extends masebook
 include form-mixins
 
+block scripts
+    script.
+        const actions = {
+            createSpace: async (space) => {
+                const fetchOptions = {
+                    method: 'POST',
+                    redirect: 'follow',
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json"
+                    },
+                    body: JSON.stringify(space),
+                }
+                try {
+                    return await fetch('/s', fetchOptions);
+                }
+                catch (error) {
+                    console.log(error.message);
+                }
+            },
+        }
+
 block title
     title New Space
 
 block content
-    h1= titleText
+    h1 New Space
     p#status
     form#space-editor
         +textField(
@@ -29,8 +51,9 @@ block content
         fieldset.form-item#permissions-editor
             legend Permissions
             span.permissions-col-header='role required to...'
-            each role in levelToRole
-                span.permissions-col-header=role
+
+            - for (let i=0; i < levelToRole.length; i++)
+                span.permissions-col-header(id='permission-label-'+i)=levelToRole[i]
             +permission('permissions.view_members', 'view members', 1)
             +permission('permissions.view_posts', 'view posts', 1)
             +permission('permissions.create_posts', 'create posts', 1)
@@ -42,58 +65,39 @@ block content
         .form-item
             label(for='submit')
                 input#submit(type='submit', value='submit')
-    script(type='module').
-        import { expand } from '/public/js/masebook.js';
-
-        const form = document.getElementById('space-editor');
-        const submitButton = document.getElementById('submit');
-        const status = document.getElementById('status');
+    script.
+        const form = elements['space-editor']
         form.addEventListener('submit', async event => {
             event.preventDefault();
-            submitButton.disabled = true;
-            const data = Object.fromEntries((new FormData(form)).entries());
+
+            // UI waiting state
+            elements['submit'].disabled = true;
 
             // Format data for use by backend
+            const data = Object.fromEntries((new FormData(form)).entries());
             const space = expand(data);
 
-            // Send data to server
-            try {
-                const fetchOptions = {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json"
-                    },
-                    body: JSON.stringify(space),
-                }
-                
-                fetch('/s', fetchOptions)
-                    .then(async res => {
-                        if (res.redirected) {
-                            window.location.href = res.url;
-                        }
-                        else {
-                            const errorText = await res.text();
-                            throw new Error(errorText);
-                        }
-                    })
-                    .catch(err => {
-                        status.classList.add('failure');
-                        submitButton.disabled = false;
-                        const details = JSON.parse(err.message);
-                        status.textContent = `ERROR: ${details.msg}`;
-                        if (details.issues) {
-                            for (const k in details.issues) {
-                                const id = k + '_issue';
-                                const element = document.getElementById(id);
-                                element.textContent = details.issues[k];
-                            }
-                        }
-                        document.getElementById('content').scroll({top: 0, left: 0, behavior: 'smooth'})
-                    });
+            // Send request
+            const res = await actions.createSpace(space);
+
+            // UI success state
+            if (res.redirected) {
+                window.location.href = res.url;
+                return;
             }
-            catch (err) {
-                console.log(err.message);
+            // UI failure state
+            else {
+                const details = await res.json();
+                elements['status'].classList.add('failure');
+                elements['submit'].disabled = false;
+                elements['status'].textContent = `ERROR: ${details.msg}`;
+                if (details.issues) {
+                    for (const k in details.issues) {
+                        const id = k + '_issue';
+                        const element = document.getElementById(id);
+                        element.textContent = details.issues[k];
+                    }
+                }
+                elements['content'].scroll({top: 0, left: 0, behavior: 'smooth'})
             }
         });

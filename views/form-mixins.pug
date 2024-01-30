@@ -19,4 +19,4 @@ mixin checkBox(id, label, checked)
 mixin permission(id, label, default_role)
     span.field-label(id=labelId)=label
     - for (let i=0; i<levelToRole.length; i++)
-        input(type='radio', name=id, value=i, checked=(i === default_role))
+        input(type='radio', name=id, value=i, checked=(i === default_role), aria-labelledby='permission-label-'+i)

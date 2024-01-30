@@ -5,7 +5,7 @@ import path from 'path';
 import routes from './controller/routes.js';
 
 import { fileURLToPath } from 'url';
-import { levelToRole } from './public/js/masebook.js';
+import { levelToRole } from './helpers/roles.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

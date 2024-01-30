@@ -1,5 +1,5 @@
 import express from 'express';
-import { levelToRole } from '../public/js/masebook.js';
+import { levelToRole } from '../helpers/roles.js';
 import { expand } from '../helpers/transformers.js';
 
 const router = express.Router();
