@@ -64,9 +64,9 @@ block content
             button.link-style#post_editor_button(onclick="togglePostEditor()") create post
             form#new_post_form.hidden(method='post')
                 label(for='post') Posting as '#{user.shortname}'...
-                    textarea.post-text(name='post', wrap='hard', oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
+                    textarea.post-text(name='post', wrap='hard', oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"', autocomplete="off")
                     input(type='submit' value='post') 
-                    input(type='reset', onclick="togglePostEditor()", value='cancel')
+                    input#cancelbutton(type='reset', onclick="togglePostEditor()", value='cancel')
 
         script.
             const postEditor = document.getElementById('new_post_form');

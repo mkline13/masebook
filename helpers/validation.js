@@ -1,11 +1,12 @@
 import { shortnameRegexPattern } from '../public/js/masebook.js';
 import Ajv from 'ajv';
-import ajvkeywords from 'ajv-keywords';
+import addKeywords from 'ajv-keywords';
+import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({coerceTypes: true});
 
-// allow the use of the 'transform' keyword in schemas
-ajvkeywords(ajv, 'transform');
+addKeywords(ajv, 'transform');
+addFormats(ajv, ['email']);
 
 // SCHEMAS
 const shortnameSchema = {type: 'string', minLength: 3, maxLength: 32, pattern: shortnameRegexPattern.toString().slice(1,-1)};
@@ -44,6 +45,23 @@ const newSpaceFormSchema = {
     additionalProperties: false
 }
 
+const loginFormSchema = {
+    type: 'object',
+    properties: {
+        email: {
+            type: 'string',
+            format: 'email'
+        },
+        password: {
+            type: 'string',
+            minLength: 8,
+            maxLength: 64
+        }
+    },
+    required: ['email', 'password']
+}
+
 // VALIDATORS
 export const validateNewSpaceForm = ajv.compile(newSpaceFormSchema);
 export const validateShortname = ajv.compile(shortnameSchema);
+export const validateLoginForm = ajv.compile(loginFormSchema);

@@ -220,7 +220,7 @@ router.route('/:space_id')
     .post(getSpaceInfo, async (req, res) => {
         const user = res.locals.user;
         const space = res.locals.space;
-        const post_text = req.body.post; // TODO: properly prep post text for storage
+        const post_text = req.body.post.trim();
 
         if (!post_text) {
             // TODO: what do I do here?
@@ -240,11 +240,12 @@ router.route('/:space_id')
             return;
         }
 
-        const sql = "INSERT INTO posts(space_id, author_id, contents) VALUES ($1, $2, $3) RETURNING *;";
-
-        let result;
+        const query = {
+            text: "INSERT INTO posts(space_id, author_id, contents) VALUES ($1, $2, $3) RETURNING *;",
+            values: [space.id, user.id, post_text]
+        }
         try {
-            result = await req.db.query(sql, [space.id, user.id, post_text]);
+            await req.db.query(query);
         }
         catch (error) {
             console.error(error);
