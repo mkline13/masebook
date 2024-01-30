@@ -41,8 +41,16 @@ function expand(obj) {
 }
 
 // Handy DOM function for getting elements by ID without using document.getElementById directly
+// caches requested elements in the target obj
 const elements = new Proxy({}, {
     get(target, prop) {
-      return document.getElementById(prop) || document.getElementsByName(prop)[0];
+        if (prop in target) {
+            return target[prop];
+        }
+        else {
+            const elem = document.getElementById(prop) || document.getElementsByName(prop)[0];
+            target[prop] = elem;
+            return elem;
+        }
     }
-  });
+});
