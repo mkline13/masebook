@@ -55,7 +55,6 @@ const elements = new Proxy({}, {
     }
 });
 
-
 // Custom fetch functions
 async function post(url, body) {
     const options = {

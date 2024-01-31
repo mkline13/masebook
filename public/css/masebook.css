@@ -55,13 +55,21 @@ main {
 }
 
 button.link-style {
-    background: none!important;
+    background: none !important;
+    font-size: medium;
     border: none;
     padding: 0!important;
     margin-right: 0.5em;
     color: #069;
     text-decoration: underline;
     cursor: pointer;
+}
+
+h1 > span.editor-link {
+    font-weight: normal;
+    font-size: medium;
+    margin-left: 1em;
+    vertical-align: middle;
 }
 
 .hidden {

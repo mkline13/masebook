@@ -21,7 +21,7 @@ block scripts
 
         actions.createPost = async (postText) => { return await post(window.location.href, postText); };
         
-        actions.createComment = (spaceId, postId, commentText) => {
+        actions.createComment = (postId, commentText) => {
             console.error('not implemented');
         }
 
@@ -31,13 +31,14 @@ block title
 
 block content
     h1 #{space.settings.title}
+        if user.space.role >= 3
+            span.editor-link [
+                a(href=space.shortname+'/edit') edit
+                | ]
 
     if space.settings.description
         p #{space.settings.description} &nbsp;
-    
-    if user.space.role >= 3
-        button.link-style() edit
-    
+
     if user.space.permissions.view_posts
         button.link-style() follow
 
@@ -115,8 +116,7 @@ block content
                 elements['cancel-button'].disabled = true;
 
                 // get postText from form
-                const form = document.getElementById('new-post-form');
-                const data = new FormData(form);
+                const data = new FormData(elements['new-post-form']);
                 let postText = data.get('posttext') ?? '';
                 postText = postText.trim();
 
