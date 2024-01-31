@@ -65,6 +65,15 @@ button.link-style {
     cursor: pointer;
 }
 
+button.link-style:hover {
+    color: darkorange;
+}
+
+button.link-style:disabled {
+    color: gray;
+    text-decoration: none;
+}
+
 h1 > span.editor-link {
     font-weight: normal;
     font-size: medium;

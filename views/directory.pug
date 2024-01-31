@@ -12,8 +12,12 @@ mixin user(u)
 mixin space(s)
     li
         +space-link(s)
-        if s.role !== 'none'
-            span.role [#{s.role}]
+        //- build badge
+        - const userInfo = [];
+        - if (s.role !== 'none') {userInfo.push(s.role)};
+        - if (s.following) {userInfo.push('following')};
+        if userInfo.length > 0
+            span.role [#{userInfo.join(' & ')}]
 
 block content
     h1 Server Directory

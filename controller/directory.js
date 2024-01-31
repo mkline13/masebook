@@ -31,11 +31,17 @@ router.route('/')
             const query = {
                 name: "get_spaces_for_directory",
                 text:  `SELECT
-                            s.id, s.shortname, s."settings.title" AS title, m.user_role AS role
+                            s.id,
+                            s.shortname,
+                            s."settings.title" AS title,
+                            m.user_role AS role,
+                            f.space_id IS NOT NULL AS following
                         FROM
                             spaces s
                             LEFT JOIN memberships m
                                 ON m.space_id=s.id AND m.user_id=$1
+                            LEFT JOIN follows f
+                                ON f.space_id=s.id AND f.user_id=$1
                             WHERE m.user_role IS NOT NULL
                                 OR s."settings.public"=true
                                 AND s."settings.show_in_dir"=true

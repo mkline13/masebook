@@ -275,10 +275,15 @@ router.route('/:space_id/edit')
     });
 
 router.route('/:space_id/follow')
-    // TODO: CREATE FOLLOW
+    // CREATE FOLLOW
     .post(getSpaceInfo, async (req, res) => {
         const user = res.locals.user;
         const space = res.locals.space;
+
+        if (!user.space.permissions.view_posts) {
+            res.status(403).send('user does not have permission to perform that action');
+            return;
+        }
 
         const query = {
             text: `INSERT INTO follows(user_id,space_id) VALUES ($1,$2);`,
@@ -295,7 +300,7 @@ router.route('/:space_id/follow')
 
         res.status(201).send('OK');
     })
-    // TODO: DELETE FOLLOW
+    // DELETE FOLLOW
     .delete(getSpaceInfo, async (req, res) => {
         const user = res.locals.user;
         const space = res.locals.space;
@@ -309,6 +314,7 @@ router.route('/:space_id/follow')
             await req.db.query(query);
         }
         catch (error) {
+            // TODO: more useful error messages? What if user is not following space
             res.status(500).send('server error');
             return;
         }

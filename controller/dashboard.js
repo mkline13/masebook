@@ -10,5 +10,6 @@ export default function dashboard(req, res) {
             {message: 'Goodbye world!', severity: 'critical'}
         ]
     }
+
     res.render('dashboard', data);
 }
