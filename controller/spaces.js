@@ -7,7 +7,7 @@ const router = express.Router();
 export default router;
 
 
-async function getSpaceInfo(req, res, next) {
+export async function getSpaceInfo(req, res, next) {
     // this middleware is used to load up all info about a particular space in the context of a given user
     const user = res.locals.user;
     const space_shortname = req.params.space_id;

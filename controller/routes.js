@@ -1,5 +1,4 @@
-import dashboard from './dashboard.js';
-
+import dashboard_router from './dashboard.js';
 import {login_controller, logout_controller} from './auth.js';
 import space_router from './spaces.js';
 import users_router from './users.js';
@@ -57,7 +56,7 @@ export default function routes(app) {
     app.use('/directory', checkAuth, user_info_to_locals, directory_router);
 
     // ROUTES
-    app.get("/", checkAuth, user_info_to_locals, dashboard);
+    app.get("/", checkAuth, user_info_to_locals, dashboard_router);
     app.get("/settings", checkAuth, user_info_to_locals, (_, res) => { res.render('settings'); });  // TODO: build settings page
     app.get("/new-space", checkAuth, user_info_to_locals, (_, res) => { res.render('new-space'); })
 }

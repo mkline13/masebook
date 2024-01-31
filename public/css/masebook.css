@@ -221,6 +221,11 @@ article.post > h4 > .post-date {
     font-weight: normal;
 }
 
+article.post span.space-title {
+    font-weight: normal;
+    font-size: smaller;
+}
+
 span.role {
     font-size: 80%;
     padding-left: 1.0em;
@@ -258,7 +263,9 @@ a.unstyled {
     text-decoration: unset;
 }
 
-
+a.unstyled:hover {
+    text-decoration: underline;
+}
 
 p.alert {
     margin: 0;

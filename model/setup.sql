@@ -141,8 +141,8 @@ CREATE TABLE posts (
 CREATE TYPE poke_t AS ENUM ('poke', 'slap', 'tickle');
 CREATE TABLE pokes (
     id              SERIAL              PRIMARY KEY,
-    sender          INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
-    recipient       INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
+    sender_id       INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
+    recipient_id    INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
     poke_type       poke_t              NOT NULL
 );
 

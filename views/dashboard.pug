@@ -33,6 +33,6 @@ block content
         if feed.length > 0
             div
                 each p in feed
-                    +post(p.author, p.content, p.date)
+                    +post(p)
         else
             p Nothing here...

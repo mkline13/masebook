@@ -32,10 +32,19 @@ INSERT INTO memberships(user_id, space_id, user_role) VALUES
     (email_to_user('scooby@gmail.com'), 5, 3),
     (email_to_user('scooby@gmail.com'), 6, 3);
     
-INSERT INTO posts(author_id, space_id, allow_comments, allow_reactions, contents) VALUES
-    (email_to_user('mason@gmail.com'), 1, false, false, 'Hello world!'),
-    (email_to_user('basin@basin.com'), 1, false, false, 'Hi world!'),
-    (email_to_user('mason@gmail.com'), 1, false, false, 'Gooby!'),
-    (email_to_user('mason@mason.mason'), 1, false, false, 'Sup world!'),
-    (email_to_user('mason@gmail.com'), 1, false, false, 'Ugggo!'),
-    (email_to_user('mason@gmail.com'), 1, false, false, 'Where are my pants?');
+INSERT INTO posts(author_id, space_id, contents) VALUES
+    (email_to_user('mason@gmail.com'), 1, 'Hello world!'),
+    (email_to_user('basin@basin.com'), 1, 'Hi world!'),
+    (email_to_user('mason@gmail.com'), 1, 'Gooby!'),
+    (email_to_user('mason@mason.mason'), 1, 'Sup world!'),
+    (email_to_user('mason@gmail.com'), 1, 'Ugggo!'),
+    (email_to_user('mason@gmail.com'), 1, 'Where are my pants?'),
+    (email_to_user('scooby@gmail.com'), 2, 'Hello world!'),
+    (email_to_user('scooby@gmail.com'), 2, 'Hi world!'),
+    (email_to_user('scooby@gmail.com'), 2, 'Gooby!'),
+    (email_to_user('scooby@gmail.com'), 2, 'Sup world!'),
+    (email_to_user('scooby@gmail.com'), 2, 'Ugggo!'),
+    (email_to_user('scooby@gmail.com'), 2, 'Where are my pants?');
+
+INSERT INTO follows(user_id, space_id) VALUES
+    (1, 1), (1, 5);
