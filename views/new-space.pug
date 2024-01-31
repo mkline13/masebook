@@ -3,24 +3,23 @@ include form-mixins
 
 block scripts
     script.
-        const actions = {
-            createSpace: async (space) => {
-                const fetchOptions = {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json"
-                    },
-                    body: JSON.stringify(space),
-                }
-                try {
-                    return await fetch('/s', fetchOptions);
-                }
-                catch (error) {
-                    console.log(error.message);
-                }
-            },
+        const actions = {};
+        actions.createSpace = async (space) => {
+            const options = {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json"
+                },
+                body: JSON.stringify(space),
+            }
+            try {
+                return await fetch('/s', options);
+            }
+            catch (error) {
+                console.log(error.message);
+            }
         }
 
 block title

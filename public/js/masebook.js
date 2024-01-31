@@ -54,3 +54,18 @@ const elements = new Proxy({}, {
         }
     }
 });
+
+
+// Custom fetch functions
+async function post(url, body) {
+    const options = {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json"
+        },
+        body: JSON.stringify(body),
+    }
+
+    return await fetch(url, options);
+}

@@ -1,6 +1,6 @@
 import express from 'express';
 import { buildInsertQuery } from '../helpers/query_builders.js';
-import { validateNewSpaceForm, validateShortname } from '../helpers/validation.js';
+import { validateNewSpaceForm, validateShortname, validatePostText } from '../helpers/validation.js';
 import { flatten, expand } from '../helpers/transformers.js';
 
 const router = express.Router();
@@ -217,32 +217,34 @@ router.route('/:space_id')
 
         res.render('space');
     })
+    // CREATE NEW POST IN SPACE
     .post(getSpaceInfo, async (req, res) => {
         const user = res.locals.user;
         const space = res.locals.space;
-        const post_text = req.body.post.trim();
 
-        if (!post_text) {
-            // TODO: what do I do here?
-            res.status(400).send("Cannot submit blank post");
+        const valid = validatePostText(req.body.postText);
+        if (!valid) {
+            res.status(422).send("invalid submission");
             return;
         }
+        
+        const postText = req.body.postText;
 
         if (space === undefined || !user.space.visible) {
-            res.status(400).send("No such space");
+            res.status(400).send("invalid space");
             return;
         }
 
         // get permissions
         const can_create_post = user.space.permissions.create_posts;
         if (!can_create_post) {
-            res.status(403).send("User does not have post creation privileges in this space");
+            res.status(403).send("invalid credentials");
             return;
         }
 
         const query = {
             text: "INSERT INTO posts(space_id, author_id, contents) VALUES ($1, $2, $3) RETURNING *;",
-            values: [space.id, user.id, post_text]
+            values: [space.id, user.id, postText]
         }
         try {
             await req.db.query(query);

@@ -62,7 +62,15 @@ const loginFormSchema = {
     required: ['email', 'password']
 }
 
+const postTextSchema = {
+    type: 'string',
+    minLength: 1,
+    maxLength: 512,
+    transform: ['trim']
+}
+
 // VALIDATORS
 export const validateNewSpaceForm = ajv.compile(newSpaceFormSchema);
 export const validateShortname = ajv.compile(shortnameSchema);
 export const validateLoginForm = ajv.compile(loginFormSchema);
+export const validatePostText = ajv.compile(postTextSchema);
