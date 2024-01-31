@@ -28,7 +28,7 @@ block title
 
 block content
     h1 New Space
-    p#status
+    p#status.failure.hidden
     form#space-editor
         +textField(
             'settings.title',
@@ -92,9 +92,9 @@ block content
             // UI failure state
             else {
                 const details = await res.json();
-                elements['status'].classList.add('failure');
                 elements['submit'].disabled = false;
                 elements['status'].textContent = `ERROR: ${details.msg}`;
+                elements['status'].classList.remove('hidden');
                 if (details.issues) {
                     for (const k in details.issues) {
                         const id = k + '_issue';
