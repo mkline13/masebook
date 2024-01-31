@@ -6,9 +6,11 @@ import { flatten, expand } from '../helpers/transformers.js';
 const router = express.Router();
 export default router;
 
+
 async function getSpaceInfo(req, res, next) {
+    // this middleware is used to load up all info about a particular space in the context of a given user
     const user = res.locals.user;
-    const space_shortname = req.params.space_id; //TODO: sanitize
+    const space_shortname = req.params.space_id;
 
     if (!validateShortname(req.params.space_id)) {
         res.status(400).send("invalid parameter");
@@ -71,9 +73,11 @@ async function getSpaceInfo(req, res, next) {
 
 /* ROUTES */
 router.route('/')
+    // GET LIST OF SPACES
     .get(async (req, res) => {
         res.status(308).redirect('/directory');
     })
+    // CREATE SPACE
     .post(
         async (req, res) => {
             // creates a new space
@@ -151,6 +155,7 @@ router.route('/')
     );
 
 router.route('/:space_id')
+    // READ SPACE
     .get(getSpaceInfo, async (req, res) => {
         const space = res.locals.space;
         const user = res.locals.user;
@@ -217,7 +222,7 @@ router.route('/:space_id')
 
         res.render('space');
     })
-    // CREATE NEW POST IN SPACE
+    // CREATE POST
     .post(getSpaceInfo, async (req, res) => {
         const user = res.locals.user;
         const space = res.locals.space;
@@ -227,7 +232,7 @@ router.route('/:space_id')
             res.status(422).send("invalid submission");
             return;
         }
-        
+
         const postText = req.body.postText;
 
         if (space === undefined || !user.space.visible) {
