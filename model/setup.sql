@@ -76,7 +76,7 @@ CREATE TABLE memberships (
     user_id             INTEGER             NOT NULL REFERENCES users ON DELETE CASCADE,
     space_id            INTEGER             NOT NULL REFERENCES spaces ON DELETE CASCADE,
     user_role           INTEGER             NOT NULL REFERENCES roles DEFAULT 1,  /* the role of the user within a space */
-    CONSTRAINT pkey     PRIMARY KEY (user_id, space_id)
+    PRIMARY KEY (user_id, space_id)
 );
 
 CREATE OR REPLACE FUNCTION assign_owner() RETURNS TRIGGER AS $$
@@ -90,6 +90,17 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER assign_owner
     AFTER INSERT ON spaces
 	FOR EACH ROW EXECUTE FUNCTION assign_owner();
+
+/*
+ *  FOLLOWS:
+ *      Determines whether posts from a space will show up in the user's feed.
+ */
+
+CREATE TABLE follows (
+    user_id             INTEGER             NOT NULL REFERENCES users ON DELETE CASCADE,
+    space_id            INTEGER             NOT NULL REFERENCES spaces ON DELETE CASCADE,
+    PRIMARY KEY (user_id, space_id)
+);
 
 /*
  *  POSTS:

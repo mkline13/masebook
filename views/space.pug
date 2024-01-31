@@ -3,25 +3,21 @@ extends masebook.pug
 block scripts
     script.
         const actions = {};
-        actions.follow = () => {
-            console.error('not implemented');
-        };
+        actions.follow = async () => { return await post(window.location.href+'/follow'); };
 
-        actions.unfollow = () => {
-            console.error('not implemented');
-        };
+        actions.unfollow = async () => { return await fetch(window.location.href+'/follow', {method: 'DELETE'}); };
 
-        actions.join = () => {
+        actions.join = async () => {
             console.error('not implemented');
         }
 
-        actions.leave = () => {
+        actions.leave = async () => {
             console.error('not implemented');
         }
 
         actions.createPost = async (postText) => { return await post(window.location.href, postText); };
         
-        actions.createComment = (postId, commentText) => {
+        actions.createComment = async (postId, commentText) => {
             console.error('not implemented');
         }
 
@@ -40,7 +36,35 @@ block content
         p #{space.settings.description} &nbsp;
 
     if user.space.permissions.view_posts
-        button.link-style() follow
+        if user.space.following
+            button.link-style(onclick="followButton(this)", value='unfollow') unfollow
+        else
+            button.link-style(onclick="followButton(this)", value='follow') follow
+        script.
+            const followButton = async (button) => {
+                button.disabled = true;
+                if (button.value === 'follow') {
+                    const res = await actions.follow();
+                    if (res.ok) {
+                        button.value = 'unfollow';
+                        button.textContent = button.value;
+                    }
+                    else {
+                        console.log(await res.text());
+                    }
+                }
+                else {
+                    const res = await actions.unfollow();
+                    if (res.ok) {
+                        button.value = 'follow';
+                        button.textContent = button.value;
+                    }
+                    else {
+                        console.log(await res.text());
+                    }
+                }
+                button.disabled = false;
+            }
 
     if user.space.permissions.view_members
         button.link-style(onclick="show('members')") members

@@ -23,10 +23,12 @@ async function getSpaceInfo(req, res, next) {
     const query = {
         text:  `SELECT
                     s.*,
-                    COALESCE(m.user_role, 0) AS user_role
+                    COALESCE(m.user_role, 0) AS user_role,
+                    f.space_id IS NOT NULL AS following
                 FROM
                     spaces s
                     FULL OUTER JOIN memberships m ON m.space_id=s.id AND m.user_id=$1
+                    FULL OUTER JOIN follows f ON f.space_id=s.id AND f.user_id=$1
                     WHERE s.shortname=$2 AND s.space_status='active';
                 `,
         values: [user.id, space_shortname],
@@ -51,9 +53,12 @@ async function getSpaceInfo(req, res, next) {
     // format data correctly
     const space = expand(data);
 
-    // put membership info into user object for tidiness
+    // put membership/following info into user object for tidiness
     user.space.role = space.user_role;
     delete space.user_role;
+
+    user.space.following = space.following;
+    delete space.following;
 
     // compute settings based on membership
     user.space.visible = space.settings.public || user.space.role !== null;
@@ -261,4 +266,52 @@ router.route('/:space_id')
         }
 
         res.status(201).send('OK');
+    });
+
+router.route('/:space_id/edit')
+    // TODO: loads up space editor
+    .get(getSpaceInfo, async (req, res) => {
+        res.status(501).send('not implemented');
+    });
+
+router.route('/:space_id/follow')
+    // TODO: CREATE FOLLOW
+    .post(getSpaceInfo, async (req, res) => {
+        const user = res.locals.user;
+        const space = res.locals.space;
+
+        const query = {
+            text: `INSERT INTO follows(user_id,space_id) VALUES ($1,$2);`,
+            values: [user.id, space.id]
+        };
+
+        try {
+            await req.db.query(query);
+        }
+        catch (error) {
+            res.status(500).send('server error');
+            return;
+        }
+
+        res.status(201).send('OK');
+    })
+    // TODO: DELETE FOLLOW
+    .delete(getSpaceInfo, async (req, res) => {
+        const user = res.locals.user;
+        const space = res.locals.space;
+
+        const query = {
+            text: `DELETE FROM follows WHERE user_id=$1 AND space_id=$2;`,
+            values: [user.id, space.id]
+        };
+
+        try {
+            await req.db.query(query);
+        }
+        catch (error) {
+            res.status(500).send('server error');
+            return;
+        }
+
+        res.status(200).send('OK');
     });

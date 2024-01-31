@@ -56,7 +56,7 @@ const elements = new Proxy({}, {
 });
 
 // Custom fetch functions
-async function post(url, body) {
+async function post(url, body={}) {
     const options = {
         method: 'POST',
         headers: {
