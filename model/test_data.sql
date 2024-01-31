@@ -48,3 +48,7 @@ INSERT INTO posts(author_id, space_id, contents) VALUES
 
 INSERT INTO follows(user_id, space_id) VALUES
     (1, 1), (1, 5);
+
+INSERT INTO pokes(sender_id, recipient_id, poke_type) VALUES
+    (2, 1, 'tickle'),
+    (3, 1, 'slap');

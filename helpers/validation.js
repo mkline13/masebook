@@ -1,6 +1,7 @@
 import Ajv from 'ajv';
 import addKeywords from 'ajv-keywords';
 import addFormats from 'ajv-formats';
+import { url } from 'inspector';
 
 const ajv = new Ajv({coerceTypes: true});
 
@@ -55,7 +56,6 @@ const newSpaceFormSchema = {
     additionalProperties: false
 }
 
-
 const passwordSchema = {
     type: 'string',
     minLength: 4,  // TODO: make minLength at least 8 before release
@@ -81,9 +81,21 @@ const postTextSchema = {
     transform: ['trim']
 }
 
+const pokeRequestBodySchema = {
+    type: 'object',
+    properties: {
+        type: {
+            type: 'string',
+            pattern: '^(poke|slap|tickle)$'
+        }
+    },
+    required: ['type']
+}
+
 // VALIDATORS
 export const validateNewSpaceForm = ajv.compile(newSpaceFormSchema);
 export const validateShortname = ajv.compile(shortnameSchema);
 export const validatePassword = ajv.compile(passwordSchema);
 export const validateLoginForm = ajv.compile(loginFormSchema);
 export const validatePostText = ajv.compile(postTextSchema);
+export const validatePokeRequest = ajv.compile(pokeRequestBodySchema);

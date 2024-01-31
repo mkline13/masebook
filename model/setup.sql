@@ -130,10 +130,9 @@ CREATE TABLE posts (
  );
 
 /*
- *  DM_THREADS
+ *  TODO: DM_THREADS
  */
 
-/* TODO */
 
 /*
  *  POKES
@@ -143,7 +142,8 @@ CREATE TABLE pokes (
     id              SERIAL              PRIMARY KEY,
     sender_id       INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
     recipient_id    INT                 NOT NULL REFERENCES users ON DELETE CASCADE,
-    poke_type       poke_t              NOT NULL
+    poke_type       poke_t              NOT NULL,
+    UNIQUE (sender_id, recipient_id)
 );
 
 

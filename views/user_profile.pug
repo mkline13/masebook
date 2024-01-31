@@ -1,13 +1,50 @@
 extends masebook.pug
 
+block scripts
+    script.
+        const actions = {};
+
+        actions.poke = async (pokeType) => { return await post(window.location.href+'/poke', {type: pokeType}); };
+
 block title
     title Masebook | #{profile.shortname}
 
 block content
     h1= profile.shortname
-    
+
+    if user.id !== profile.id
+        #pokes-panel
+            if profile.poke_type
+                - const lastLetter = profile.poke_type[profile.poke_type.length-1];
+                - const tense = lastLetter === 'e' ? 'd' : lastLetter + 'ed';
+                p you have #{profile.poke_type}#{tense} #{profile.shortname}
+            else
+                button.link-style(onclick='poke(this, "poke")') poke
+                button.link-style(onclick='poke(this, "slap")') slap
+                button.link-style(onclick='poke(this, "tickle")') tickle
+
     img(src="/public/img/placeholder-guy64.png" alt="placeholder" width="64" height="64")
+    
     if profile.settings.profile_desc
         p #{profile.settings.profile_desc} &nbsp;
     else
         p no description...
+    
+    script.
+        async function poke(button, pokeType) {
+            const buttons = document.querySelectorAll('#pokes-panel > button');
+            buttons.forEach(b => b.disabled=true);
+
+            const res = await actions.poke(pokeType);
+
+            if (res.ok) {
+                const recipient = await res.text();
+                const lastLetter = pokeType[pokeType.length-1];
+                const tense = lastLetter === 'e' ? 'd' : lastLetter + 'ed';
+                elements['pokes-panel'].innerHTML = `<p>you have ${pokeType + tense} ${recipient}</p>`;
+            }
+            else {
+                console.error(await res.text())
+                buttons.forEach(b => b.disabled=false);
+            }
+        }
