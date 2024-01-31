@@ -1,8 +1,15 @@
 import bcrypt from 'bcryptjs';
 import { expand } from '../helpers/transformers.js';
+import { validateLoginForm } from '../helpers/validation.js';
+
 
 export async function login_controller(req, res) {
-    // TODO: VALIDATE INPUTS
+    const valid = validateLoginForm(req.body);
+    if (!valid) {
+        res.status(422).send('invalid submission');
+        return;
+    }
+
     const client_email = req.body.email;
     const client_password = req.body.password;
 

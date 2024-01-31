@@ -5,7 +5,16 @@ import addFormats from 'ajv-formats';
 const ajv = new Ajv({coerceTypes: true});
 
 addKeywords(ajv, 'transform');
-addFormats(ajv, ['email']);
+addFormats(ajv, ['email', 'password']);
+
+// FUNCTIONS
+// TODO: use in schema
+function isStrongPassword(string) {
+    return  /[a-z]/.test(string) &&
+            /[A-Z]/.test(string) &&
+            /[0-9]/.test(string) &&
+            /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(string);
+}
 
 // SCHEMAS
 const shortnameSchema = {type: 'string', minLength: 3, maxLength: 32, pattern: '^[a-z][a-z0-9_-]{2,31}$'};
@@ -46,6 +55,13 @@ const newSpaceFormSchema = {
     additionalProperties: false
 }
 
+
+const passwordSchema = {
+    type: 'string',
+    minLength: 4,  // TODO: make minLength at least 8 before release
+    maxLength: 64
+}
+
 const loginFormSchema = {
     type: 'object',
     properties: {
@@ -53,11 +69,7 @@ const loginFormSchema = {
             type: 'string',
             format: 'email'
         },
-        password: {
-            type: 'string',
-            minLength: 8,
-            maxLength: 64
-        }
+        password: passwordSchema,
     },
     required: ['email', 'password']
 }
@@ -72,5 +84,6 @@ const postTextSchema = {
 // VALIDATORS
 export const validateNewSpaceForm = ajv.compile(newSpaceFormSchema);
 export const validateShortname = ajv.compile(shortnameSchema);
+export const validatePassword = ajv.compile(passwordSchema);
 export const validateLoginForm = ajv.compile(loginFormSchema);
 export const validatePostText = ajv.compile(postTextSchema);
